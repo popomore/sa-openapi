@@ -1,1 +1,1 @@
-"""测试包."""
+"""Tests for sa-openapi."""
