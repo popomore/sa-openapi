@@ -1,0 +1,29 @@
+# SensorsData Analytics OpenAPI 配置文件示例
+# 复制此文件为 ~/.sa-openapi.toml 并填入你的凭证
+
+[default]
+base_url = "https://your-instance.sensorsdata.cn"
+api_key = "sk-your-api-key"
+project = "default"
+
+# 可选：超时设置（秒）
+# timeout = 30
+
+# 可选：重试次数
+# max_retries = 3
+
+# 多环境配置示例
+[production]
+base_url = "https://prod.sensorsdata.cn"
+api_key = "sk-prod-api-key"
+project = "prod"
+
+[staging]
+base_url = "https://staging.sensorsdata.cn"
+api_key = "sk-staging-api-key"
+project = "staging"
+
+[development]
+base_url = "https://dev.sensorsdata.cn"
+api_key = "sk-dev-api-key"
+project = "dev"
