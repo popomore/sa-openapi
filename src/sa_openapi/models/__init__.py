@@ -16,6 +16,31 @@ from .dashboard import (
     DashboardType,
     Navigation,
 )
+from .dataset import (
+    CreateSavedQueryParams,
+    Dataset,
+    QueryParams,
+    SavedQuery,
+    Schema,
+    SchemaField,
+)
+from .model import (
+    AttributionData,
+    AttributionParams,
+    AttributionReport,
+    ByField,
+    Filter,
+    FunnelParams,
+    FunnelReport,
+    FunnelStep,
+    Measure,
+    RetentionData,
+    RetentionParams,
+    RetentionReport,
+    SqlExplainResult,
+    SqlQueryParams,
+    SqlValidateResult,
+)
 
 __all__ = [
     # Common
@@ -36,4 +61,31 @@ __all__ = [
     "Link",
     "LinkDataParams",
     "LinkExportParams",
+    # Dataset
+    "Dataset",
+    "Schema",
+    "SchemaField",
+    "SavedQuery",
+    "QueryParams",
+    "CreateSavedQueryParams",
+    # Model - Common
+    "Measure",
+    "Filter",
+    "ByField",
+    # Model - Funnel
+    "FunnelParams",
+    "FunnelStep",
+    "FunnelReport",
+    # Model - Retention
+    "RetentionParams",
+    "RetentionData",
+    "RetentionReport",
+    # Model - Attribution
+    "AttributionParams",
+    "AttributionData",
+    "AttributionReport",
+    # Model - SQL
+    "SqlQueryParams",
+    "SqlExplainResult",
+    "SqlValidateResult",
 ]
