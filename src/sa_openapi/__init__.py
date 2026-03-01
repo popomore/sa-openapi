@@ -17,6 +17,16 @@ Usage:
     datasets = client.dataset.list_dataset()
 
     client.close()
+
+Async usage:
+    from sa_openapi import AsyncSensorsAnalyticsClient
+
+    async with AsyncSensorsAnalyticsClient(
+        base_url="https://your-instance.sensorsdata.cn",
+        api_key="sk-xxx",
+        project="default",
+    ) as client:
+        navigations = await client.dashboard.list_navigation()
 """
 
 from ._config import ClientConfig, ConfigManager
@@ -30,6 +40,7 @@ from ._exceptions import (
     TimeoutError,
     ValidationError,
 )
+from .async_client import AsyncSensorsAnalyticsClient
 from .client import SensorsAnalyticsClient
 
 __version__ = "0.1.0"
@@ -39,6 +50,7 @@ __all__ = [
     "__version__",
     # Client
     "SensorsAnalyticsClient",
+    "AsyncSensorsAnalyticsClient",
     "ClientConfig",
     "ConfigManager",
     # Exceptions
