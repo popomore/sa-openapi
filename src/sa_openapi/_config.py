@@ -6,7 +6,12 @@ import os
 from pathlib import Path
 from typing import Any
 
-import tomli
+try:
+    import tomllib as tomli  # Python 3.11+
+except ImportError:  # pragma: no cover
+    import tomli  # type: ignore[no-redef]
+
+import toml
 
 
 class ClientConfig:
@@ -97,11 +102,9 @@ class ConfigManager:
 
     def _save_to_file(self) -> None:
         """Save configuration to file."""
-        import tomli_w
-
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_path, "wb") as f:
-            tomli_w.dump(self._config, f)
+        with open(self.config_path, "w", encoding="utf-8") as f:
+            toml.dump(self._config, f)
 
     def set_default_profile(self, profile: str) -> None:
         """Set default profile."""
