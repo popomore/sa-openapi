@@ -46,11 +46,12 @@ class DashboardServiceV1:
         )
         # API returns {"data": {"groups": [...], "type": "..."}}
         if isinstance(raw_data, dict):
-            raw_items = raw_data.get("groups", raw_data.get("list", raw_data.get("items", [])))
+            candidate = raw_data.get("groups", raw_data.get("list", raw_data.get("items", [])))
+            raw_items = candidate if isinstance(candidate, list) else []
         else:
             raw_items = raw_data if isinstance(raw_data, list) else []
         logger.debug("list_navigation raw_items len=%s", len(raw_items))
-        if raw_items and isinstance(raw_items, list):
+        if raw_items:
             logger.debug("list_navigation first item: %r", raw_items[0])
         return [Navigation(**item) for item in raw_items if isinstance(item, dict)]
 

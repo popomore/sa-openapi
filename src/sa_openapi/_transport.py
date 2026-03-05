@@ -89,7 +89,7 @@ class AiohttpTransport:
                     await asyncio.sleep(2**attempt)
                     continue
                 raise last_exception from e
-            except aiohttp.ServerTimeoutError as e:
+            except asyncio.TimeoutError as e:
                 last_exception = TimeoutError(str(e))
                 if retryable and attempt < attempts - 1:
                     await asyncio.sleep(2**attempt)

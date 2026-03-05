@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import threading
+from contextlib import suppress
 from typing import Any
 
 from typing_extensions import Self
@@ -56,7 +57,10 @@ class SensorsAnalyticsClient:
         *,
         timeout: float = 30.0,
         max_retries: int = 3,
+        sync_timeout: float = 30.0,
     ):
+        self._closed = False
+        self._sync_timeout = sync_timeout
         self._loop = asyncio.new_event_loop()
         self._thread = threading.Thread(
             target=self._loop.run_forever, daemon=True, name="sa-openapi-eventloop"
@@ -76,15 +80,26 @@ class SensorsAnalyticsClient:
         self.dataset = _SyncServiceProxy(self._async_client.dataset, self._run_sync)
         self.model = _SyncServiceProxy(self._async_client.model, self._run_sync)
 
-    def _run_sync(self, coro: Any) -> Any:
+    def _run_sync(self, coro: Any, timeout: float | None = None) -> Any:
         """Submit *coro* to the background event loop and block until done."""
-        return asyncio.run_coroutine_threadsafe(coro, self._loop).result()
+        if self._closed:
+            raise RuntimeError("Client is closed")
+        fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        return fut.result(timeout=self._sync_timeout if timeout is None else timeout)
 
     def close(self) -> None:
         """Close the aiohttp session and stop the background event loop."""
-        self._run_sync(self._async_client.aclose())
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._thread.join(timeout=5)
+        if self._closed:
+            return
+        try:
+            self._run_sync(self._async_client.aclose())
+        finally:
+            with suppress(RuntimeError):
+                self._loop.call_soon_threadsafe(self._loop.stop)
+            self._thread.join(timeout=5)
+            if not self._loop.is_closed():
+                self._loop.close()
+            self._closed = True
 
     def __enter__(self) -> Self:
         return self
@@ -101,6 +116,7 @@ class SensorsAnalyticsClient:
             project=config.project,
             timeout=config.timeout,
             max_retries=config.max_retries,
+            sync_timeout=max(config.timeout * 2, 30.0),
         )
 
     @classmethod

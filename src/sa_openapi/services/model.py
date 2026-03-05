@@ -29,7 +29,7 @@ class ModelServiceV1:
         window: int | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
-    ) -> FunnelReport:
+    ) -> Any:
         """Get funnel analysis report.
 
         Args:
@@ -60,7 +60,11 @@ class ModelServiceV1:
             json=params,
         )
         data = response.json()
-        return FunnelReport(**data.get("data", {}))
+        payload = data.get("data", {})
+        try:
+            return FunnelReport(**payload)
+        except Exception:
+            return payload
 
     async def retention_report(
         self,
@@ -71,7 +75,7 @@ class ModelServiceV1:
         by_fields: list[dict[str, Any]] | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
-    ) -> RetentionReport:
+    ) -> Any:
         """Get retention analysis report.
 
         Args:
@@ -105,7 +109,11 @@ class ModelServiceV1:
             json=params,
         )
         data = response.json()
-        return RetentionReport(**data.get("data", {}))
+        payload = data.get("data", {})
+        try:
+            return RetentionReport(**payload)
+        except Exception:
+            return payload
 
     async def attribution_report(
         self,
@@ -115,7 +123,7 @@ class ModelServiceV1:
         window: int | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
-    ) -> AttributionReport:
+    ) -> Any:
         """Get attribution analysis report.
 
         Args:
@@ -146,7 +154,11 @@ class ModelServiceV1:
             json=params,
         )
         data = response.json()
-        return AttributionReport(**data.get("data", {}))
+        payload = data.get("data", {})
+        try:
+            return AttributionReport(**payload)
+        except Exception:
+            return payload
 
     async def sql_query(
         self,
@@ -171,15 +183,30 @@ class ModelServiceV1:
             json=params,
         )
         data = response.json()
-        result = data.get("data") or {}
-        # v1 uses "data" for rows; may be flat array (single row) or list of lists
-        if "data" in result and "rows" not in result:
+        result = data.get("data")
+        if isinstance(result, dict) and "data" in result and "rows" not in result:
             raw = result.pop("data")
-            # v1 single row: flat array [v1, v2, ...]; multi row: [[v1,v2], [v1,v2], ...]
-            if raw and not isinstance(raw[0], (list, tuple)):
-                raw = [raw]
-            result["rows"] = raw
-        return result
+            if raw is None:
+                result["rows"] = []
+            elif isinstance(raw, list):
+                if raw and not isinstance(raw[0], (list, tuple)):
+                    result["rows"] = [raw]
+                else:
+                    result["rows"] = raw
+            else:
+                result["rows"] = [[raw]]
+            return result
+
+        # Normalize edge cases where v1 may return rows directly in data
+        if result is None:
+            return {"rows": []}
+        if isinstance(result, list):
+            if result and not isinstance(result[0], (list, tuple)):
+                return {"rows": [result]}
+            return {"rows": result}
+        if isinstance(result, dict):
+            return result
+        return {"rows": [[result]]}
 
     async def explain_sql(self, sql: str) -> SqlExplainResult:
         """Get SQL execution plan.
