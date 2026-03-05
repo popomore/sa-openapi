@@ -1,0 +1,74 @@
+language: zh-CN
+early_access: false
+
+reviews:
+  profile: walkthrough
+  request_changes_workflow: true
+  high_level_summary: true
+  title_prefix: "[CodeRabbit]"
+  collapse_walkthrough: false
+
+chat:
+  auto_reply: true
+
+tools:
+  ruff:
+    enabled: true
+  golangci:
+    enabled: false
+  detekt:
+    enabled: false
+  checkstyle:
+    enabled: false
+  phpstan:
+    enabled: false
+  prettier:
+    enabled: false
+  eslint:
+    enabled: false
+  swiftlint:
+    enabled: false
+  yamllint:
+    enabled: false
+  shellcheck:
+    enabled: false
+  starlark:
+    enabled: false
+  tslint:
+    enabled: false
+  actionlint:
+    enabled: false
+
+path_filters:
+  - '!**/*.py'
+  - '!pyproject.toml'
+  - '!setup.py'
+  - '!setup.cfg'
+  - '!pytest.ini'
+  - '!tox.ini'
+  - '!**/__init__.py'
+  - '!**/conftest.py'
+  - '!**/test_*.py'
+  - '!**/*_test.py'
+  - '!**/tests/**'
+  - '!**/.venv/**'
+  - '!**/.pytest_cache/**'
+  - '!**/.mypy_cache/**'
+  - '!**/.ruff_cache/**'
+  - '!**/dist/**'
+  - '!**/build/**'
+  - '!**/*.egg-info/**'
+
+checks:
+  anything:
+    enabled: true
+  comment:
+    enabled: true
+
+auto_title:
+  enabled: false
+
+formats:
+  enabled: true
+
+version: v2
