@@ -3,7 +3,7 @@
 from typing import Any
 
 from .._auth import AuthHandler
-from .._transport import Transport
+from .._transport import AiohttpTransport
 from ..models.model import (
     AttributionReport,
     FunnelReport,
@@ -13,15 +13,15 @@ from ..models.model import (
 )
 
 
-class ModelService:
-    """Model service for Sensors Analytics (funnel, retention, attribution)."""
+class ModelServiceV1:
+    """Model service for Sensors Analytics (v1 API: funnel, retention, attribution)."""
 
-    def __init__(self, transport: Transport, auth: AuthHandler):
+    def __init__(self, transport: AiohttpTransport, auth: AuthHandler):
         self._transport = transport
         self._auth = auth
-        self._base_url = transport.config.model_base_url
+        self._base_url = transport.config.model_v1_base_url
 
-    def funnel_report(
+    async def funnel_report(
         self,
         measures: list[dict[str, Any]],
         filter: dict[str, Any] | None = None,
@@ -55,14 +55,14 @@ class ModelService:
         if end_date:
             params["endDate"] = end_date
 
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/model/funnel/report",
             json=params,
         )
         data = response.json()
         return FunnelReport(**data.get("data", {}))
 
-    def retention_report(
+    async def retention_report(
         self,
         initial_event: str,
         return_event: str,
@@ -100,14 +100,14 @@ class ModelService:
         if end_date:
             params["endDate"] = end_date
 
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/model/retention/report",
             json=params,
         )
         data = response.json()
         return RetentionReport(**data.get("data", {}))
 
-    def attribution_report(
+    async def attribution_report(
         self,
         conversion_event: str,
         touch_points: list[str],
@@ -141,14 +141,14 @@ class ModelService:
         if end_date:
             params["endDate"] = end_date
 
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/model/attribution/report",
             json=params,
         )
         data = response.json()
         return AttributionReport(**data.get("data", {}))
 
-    def sql_query(
+    async def sql_query(
         self,
         sql: str,
         limit: int | None = None,
@@ -166,14 +166,22 @@ class ModelService:
         if limit is not None:
             params["limit"] = limit
 
-        response = self._transport.post(
-            f"{self._base_url}/model/data",
+        response = await self._transport.post(
+            f"{self._base_url}/model/sql/query",
             json=params,
         )
         data = response.json()
-        return data.get("data", {})
+        result = data.get("data") or {}
+        # v1 uses "data" for rows; may be flat array (single row) or list of lists
+        if "data" in result and "rows" not in result:
+            raw = result.pop("data")
+            # v1 single row: flat array [v1, v2, ...]; multi row: [[v1,v2], [v1,v2], ...]
+            if raw and not isinstance(raw[0], (list, tuple)):
+                raw = [raw]
+            result["rows"] = raw
+        return result
 
-    def explain_sql(self, sql: str) -> SqlExplainResult:
+    async def explain_sql(self, sql: str) -> SqlExplainResult:
         """Get SQL execution plan.
 
         Args:
@@ -182,14 +190,14 @@ class ModelService:
         Returns:
             SQL execution plan
         """
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/model/sql/explain",
             json={"sql": sql},
         )
         data = response.json()
         return SqlExplainResult(**data.get("data", {}))
 
-    def validate_sql(self, sql: str) -> SqlValidateResult:
+    async def validate_sql(self, sql: str) -> SqlValidateResult:
         """Validate SQL syntax.
 
         Args:
@@ -198,7 +206,7 @@ class ModelService:
         Returns:
             Validation result
         """
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/model/sql/validate",
             json={"sql": sql},
         )

@@ -1,13 +1,13 @@
 """Services for sa-openapi."""
 
-from .channel import ChannelService
-from .dashboard import DashboardService
-from .dataset import DatasetService
-from .model import ModelService
+from .channel import ChannelServiceV1
+from .dashboard import DashboardServiceV1
+from .dataset import DatasetServiceV1
+from .model import ModelServiceV1
 
 __all__ = [
-    "ChannelService",
-    "DashboardService",
-    "DatasetService",
-    "ModelService",
+    "ChannelServiceV1",
+    "DashboardServiceV1",
+    "DatasetServiceV1",
+    "ModelServiceV1",
 ]
