@@ -51,6 +51,7 @@ def cli(ctx, profile, base_url, api_key, project):
     # Create client
     client = SensorsAnalyticsClient.from_config(cfg)
     ctx.obj = {"client": client}
+    ctx.call_on_close(client.close)
 
 
 # Register command groups
