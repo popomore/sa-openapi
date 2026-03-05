@@ -67,7 +67,7 @@ class Transport:
                     time.sleep(wait_time)
             except httpx.HTTPStatusError as e:
                 # Don't retry on HTTP errors
-                raise self._handle_response(e.response) from e
+                return self._handle_response(e.response)
 
         raise last_exception if last_exception else NetworkError("Request failed")
 
