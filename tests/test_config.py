@@ -1,8 +1,8 @@
 """Tests for config."""
 
 import os
-from contextlib import contextmanager
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 from sa_openapi._config import ClientConfig, ConfigManager
