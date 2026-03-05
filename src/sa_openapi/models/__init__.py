@@ -8,83 +8,74 @@ from .common import (
     Pagination,
     QueryResult,
 )
-from .dashboard import (
-    Bookmark,
-    BookmarkDataParams,
-    BookmarkExportParams,
-    DashboardType,
-    Navigation,
-)
-from .dataset import (
-    CreateSavedQueryParams,
-    Dataset,
-    QueryParams,
-    SavedQuery,
-    Schema,
-    SchemaField,
-)
+from .dashboard import BookmarkDataParams, BookmarkExportParams, Navigation
+from .dataset import CreateSavedQueryParams, Dataset, SavedQuery
 from .model import (
-    AttributionData,
-    AttributionParams,
+    ApiFunnelDefine,
+    ApiRequestElementCondition,
+    ApiRequestEventWithFilter,
+    ApiRequestFilter,
+    ApiRequestMeasure,
     AttributionReport,
-    ByField,
-    Filter,
-    FunnelParams,
+    AttributionReportRequest,
+    AttributionReportResponse,
     FunnelReport,
-    FunnelStep,
+    FunnelReportRequest,
+    FunnelReportResponse,
+    LinkEvent,
     Measure,
-    RetentionData,
-    RetentionParams,
     RetentionReport,
+    RetentionReportRequest,
+    RetentionReportResponse,
     SqlExplainResult,
-    SqlQueryParams,
+    SqlQueryRequest,
+    SqlQueryResponse,
     SqlValidateResult,
 )
 
 __all__ = [
-    "AttributionData",
-    # Model - Attribution
-    "AttributionParams",
+    # model (v1 aligned)
+    "ApiFunnelDefine",
+    "ApiRequestElementCondition",
+    "ApiRequestEventWithFilter",
+    "ApiRequestFilter",
+    "ApiRequestMeasure",
     "AttributionReport",
-    "Bookmark",
-    # Common
+    "AttributionReportRequest",
+    "AttributionReportResponse",
+    # common
     "BookmarkData",
+    # dashboard
     "BookmarkDataParams",
     "BookmarkExportParams",
     "ByField",
-    # Channel
+    # channel
     "Channel",
+    # dataset
     "CreateSavedQueryParams",
-    # Dashboard
-    "DashboardType",
-    # Dataset
     "Dataset",
     "ErrorInfo",
+    # backward compatibility
     "Filter",
-    # Model - Funnel
-    "FunnelParams",
     "FunnelReport",
-    "FunnelStep",
+    "FunnelReportRequest",
+    "FunnelReportResponse",
     "HttpApiResult",
     "Link",
     "LinkData",
     "LinkDataParams",
+    "LinkEvent",
     "LinkExportParams",
-    # Model - Common
     "Measure",
     "Navigation",
     "Pagination",
-    "QueryParams",
     "QueryResult",
-    "RetentionData",
-    # Model - Retention
-    "RetentionParams",
     "RetentionReport",
+    "RetentionReportRequest",
+    "RetentionReportResponse",
     "SavedQuery",
-    "Schema",
-    "SchemaField",
     "SqlExplainResult",
-    # Model - SQL
-    "SqlQueryParams",
+    "SqlQueryRequest",
+    "SqlQueryResponse",
     "SqlValidateResult",
 ]

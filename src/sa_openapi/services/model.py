@@ -1,14 +1,15 @@
-"""Model service implementation."""
+"""Model service implementation - OpenAPI v1 aligned."""
 
 from typing import Any
 
 from .._auth import AuthHandler
 from .._transport import AiohttpTransport
 from ..models.model import (
-    AttributionReport,
-    FunnelReport,
-    RetentionReport,
+    AttributionReportResponse,
+    FunnelReportResponse,
+    RetentionReportResponse,
     SqlExplainResult,
+    SqlQueryResponse,
     SqlValidateResult,
 )
 
@@ -23,37 +24,28 @@ class ModelServiceV1:
 
     async def funnel_report(
         self,
-        measures: list[dict[str, Any]],
+        funnel: dict[str, Any] | None = None,
+        from_date: str | None = None,
+        to_date: str | None = None,
         filter: dict[str, Any] | None = None,
-        by_fields: list[dict[str, Any]] | None = None,
-        window: int | None = None,
-        start_date: str | None = None,
-        end_date: str | None = None,
-    ) -> Any:
-        """Get funnel analysis report.
-
-        Args:
-            measures: List of measure definitions
-            filter: Filter conditions
-            by_fields: Group by fields
-            window: Conversion window in days
-            start_date: Start date
-            end_date: End date
-
-        Returns:
-            Funnel report
-        """
-        params: dict[str, Any] = {"measures": measures}
+        by_fields: list[str] | None = None,
+        **kwargs: Any,
+    ) -> FunnelReportResponse:
+        """Get funnel analysis report (v1)."""
+        params: dict[str, Any] = {}
+        if funnel is not None:
+            params["funnel"] = funnel
+        if from_date:
+            params["fromDate"] = from_date
+        if to_date:
+            params["toDate"] = to_date
         if filter:
             params["filter"] = filter
         if by_fields:
             params["byFields"] = by_fields
-        if window is not None:
-            params["window"] = window
-        if start_date:
-            params["startDate"] = start_date
-        if end_date:
-            params["endDate"] = end_date
+        for k, v in kwargs.items():
+            if v is not None:
+                params[k] = v
 
         response = await self._transport.post(
             f"{self._base_url}/model/funnel/report",
@@ -61,48 +53,38 @@ class ModelServiceV1:
         )
         data = response.json()
         payload = data.get("data", {})
-        try:
-            return FunnelReport(**payload)
-        except Exception:
-            return payload
+        return FunnelReportResponse(**payload)
 
     async def retention_report(
         self,
-        initial_event: str,
-        return_event: str,
-        periods: list[int],
+        from_date: str | None = None,
+        to_date: str | None = None,
+        duration: int | None = None,
+        first_event: dict[str, Any] | None = None,
+        second_event: dict[str, Any] | None = None,
         filter: dict[str, Any] | None = None,
-        by_fields: list[dict[str, Any]] | None = None,
-        start_date: str | None = None,
-        end_date: str | None = None,
-    ) -> Any:
-        """Get retention analysis report.
-
-        Args:
-            initial_event: Initial event name
-            return_event: Return event name
-            periods: Retention periods [1, 3, 7, 14, 30]
-            filter: Filter conditions
-            by_fields: Group by fields
-            start_date: Start date
-            end_date: End date
-
-        Returns:
-            Retention report
-        """
-        params: dict[str, Any] = {
-            "initialEvent": initial_event,
-            "returnEvent": return_event,
-            "periods": periods,
-        }
+        measures: list[dict[str, Any]] | None = None,
+        **kwargs: Any,
+    ) -> RetentionReportResponse:
+        """Get retention analysis report (v1)."""
+        params: dict[str, Any] = {}
+        if from_date:
+            params["fromDate"] = from_date
+        if to_date:
+            params["toDate"] = to_date
+        if duration is not None:
+            params["duration"] = duration
+        if first_event:
+            params["firstEvent"] = first_event
+        if second_event:
+            params["secondEvent"] = second_event
         if filter:
             params["filter"] = filter
-        if by_fields:
-            params["byFields"] = by_fields
-        if start_date:
-            params["startDate"] = start_date
-        if end_date:
-            params["endDate"] = end_date
+        if measures:
+            params["measures"] = measures
+        for k, v in kwargs.items():
+            if v is not None:
+                params[k] = v
 
         response = await self._transport.post(
             f"{self._base_url}/model/retention/report",
@@ -110,44 +92,32 @@ class ModelServiceV1:
         )
         data = response.json()
         payload = data.get("data", {})
-        try:
-            return RetentionReport(**payload)
-        except Exception:
-            return payload
+        return RetentionReportResponse(**payload)
 
     async def attribution_report(
         self,
-        conversion_event: str,
-        touch_points: list[str],
-        model: str,
-        window: int | None = None,
-        start_date: str | None = None,
-        end_date: str | None = None,
-    ) -> Any:
-        """Get attribution analysis report.
-
-        Args:
-            conversion_event: Conversion event name
-            touch_points: List of touch point event names
-            model: Attribution model (FIRST_TOUCH, LAST_TOUCH, LINEAR, etc.)
-            window: Attribution window in days
-            start_date: Start date
-            end_date: End date
-
-        Returns:
-            Attribution report
-        """
-        params: dict[str, Any] = {
-            "conversionEvent": conversion_event,
-            "touchPoints": touch_points,
-            "model": model,
-        }
-        if window is not None:
-            params["window"] = window
-        if start_date:
-            params["startDate"] = start_date
-        if end_date:
-            params["endDate"] = end_date
+        from_date: str | None = None,
+        to_date: str | None = None,
+        target_event: dict[str, Any] | None = None,
+        link_events: list[dict[str, Any]] | None = None,
+        model_type: str | None = None,
+        **kwargs: Any,
+    ) -> AttributionReportResponse:
+        """Get attribution analysis report (v1)."""
+        params: dict[str, Any] = {}
+        if from_date:
+            params["fromDate"] = from_date
+        if to_date:
+            params["toDate"] = to_date
+        if target_event:
+            params["targetEvent"] = target_event
+        if link_events:
+            params["linkEvents"] = link_events
+        if model_type:
+            params["modelType"] = model_type
+        for k, v in kwargs.items():
+            if v is not None:
+                params[k] = v
 
         response = await self._transport.post(
             f"{self._base_url}/model/attribution/report",
@@ -155,87 +125,28 @@ class ModelServiceV1:
         )
         data = response.json()
         payload = data.get("data", {})
-        try:
-            return AttributionReport(**payload)
-        except Exception:
-            return payload
+        return AttributionReportResponse(**payload)
 
     async def sql_query(
         self,
         sql: str,
-        limit: int | None = None,
-    ) -> Any:
-        """Execute custom SQL query.
-
-        Args:
-            sql: SQL query string
-            limit: Result limit
-
-        Returns:
-            Query result
-        """
+        limit: str | None = None,
+    ) -> SqlQueryResponse:
+        """Execute custom SQL query (v1)."""
         params: dict[str, Any] = {"sql": sql}
         if limit is not None:
-            params["limit"] = limit
+            params["limit"] = str(limit)
 
         response = await self._transport.post(
             f"{self._base_url}/model/sql/query",
             json=params,
         )
         data = response.json()
-        result = data.get("data")
-        if isinstance(result, dict) and "data" in result and "rows" not in result:
-            raw = result.pop("data")
-            if raw is None:
-                result["rows"] = []
-            elif isinstance(raw, list):
-                if raw and not isinstance(raw[0], (list, tuple)):
-                    result["rows"] = [raw]
-                else:
-                    result["rows"] = raw
-            else:
-                result["rows"] = [[raw]]
-            return result
-
-        # Normalize edge cases where v1 may return rows directly in data
-        if result is None:
-            return {"rows": []}
-        if isinstance(result, list):
-            if result and not isinstance(result[0], (list, tuple)):
-                return {"rows": [result]}
-            return {"rows": result}
-        if isinstance(result, dict):
-            return result
-        return {"rows": [[result]]}
+        payload = data.get("data", {})
+        return SqlQueryResponse(**payload)
 
     async def explain_sql(self, sql: str) -> SqlExplainResult:
-        """Get SQL execution plan.
-
-        Args:
-            sql: SQL query string
-
-        Returns:
-            SQL execution plan
-        """
-        response = await self._transport.post(
-            f"{self._base_url}/model/sql/explain",
-            json={"sql": sql},
-        )
-        data = response.json()
-        return SqlExplainResult(**data.get("data", {}))
+        raise NotImplementedError("explain-sql is not supported by Model v1 API")
 
     async def validate_sql(self, sql: str) -> SqlValidateResult:
-        """Validate SQL syntax.
-
-        Args:
-            sql: SQL query string
-
-        Returns:
-            Validation result
-        """
-        response = await self._transport.post(
-            f"{self._base_url}/model/sql/validate",
-            json={"sql": sql},
-        )
-        data = response.json()
-        return SqlValidateResult(**data.get("data", {}))
+        raise NotImplementedError("validate-sql is not supported by Model v1 API")

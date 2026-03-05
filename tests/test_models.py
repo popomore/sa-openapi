@@ -5,24 +5,22 @@ from sa_openapi.models.dashboard import Bookmark, DashboardType, Navigation
 from sa_openapi.models.dataset import Dataset, Schema, SchemaField
 from sa_openapi.models.model import (
     Filter,
-    FunnelParams,
     FunnelReport,
-    FunnelStep,
+    FunnelReportRequest,
+    FunnelReportResponse,
     Measure,
-    RetentionData,
-    RetentionParams,
     RetentionReport,
+    RetentionReportRequest,
+    RetentionReportResponse,
 )
 
 
 def test_dashboard_type():
-    """Test dashboard type enum."""
     assert DashboardType.PRIVATE == "PRIVATE"
     assert DashboardType.PUBLIC == "PUBLIC"
 
 
 def test_navigation_model():
-    """Test navigation model."""
     nav = Navigation(
         id=1,
         name="Test Navigation",
@@ -37,7 +35,6 @@ def test_navigation_model():
 
 
 def test_bookmark_model():
-    """Test bookmark model."""
     bookmark = Bookmark(
         id=1,
         name="Test Bookmark",
@@ -51,7 +48,6 @@ def test_bookmark_model():
 
 
 def test_channel_model():
-    """Test channel model."""
     channel = Channel(
         id=1,
         name="Test Channel",
@@ -62,7 +58,6 @@ def test_channel_model():
 
 
 def test_link_model():
-    """Test link model."""
     link = Link(
         id=1,
         name="Test Link",
@@ -76,7 +71,6 @@ def test_link_model():
 
 
 def test_dataset_model():
-    """Test dataset model."""
     dataset = Dataset(
         id=1,
         name="Test Dataset",
@@ -88,7 +82,6 @@ def test_dataset_model():
 
 
 def test_schema_model():
-    """Test schema model."""
     schema = Schema(
         fields=[
             SchemaField(name="user_id", field_type="string", nullable=False),
@@ -100,68 +93,53 @@ def test_schema_model():
 
 
 def test_measure_model():
-    """Test measure model."""
-    measure = Measure(event="view_product", aggregator="COUNT")
-    assert measure.event == "view_product"
+    # v1 uses event_name instead of event
+    measure = Measure(event_name="view_product", aggregator="COUNT")
+    assert measure.event_name == "view_product"
     assert measure.aggregator == "COUNT"
 
 
 def test_filter_model():
-    """Test filter model."""
-    filter = Filter(property="user_id", operator="=", value="123")
-    assert filter.property == "user_id"
-    assert filter.operator == "="
-    assert filter.value == "123"
+    # v1 model uses 'field' instead of 'property'
+    from sa_openapi.models.model import ApiRequestElementCondition
+    cond = ApiRequestElementCondition(field="user_id", function="=", params=["123"])
+    assert cond.field == "user_id"
+    assert cond.function == "="
 
 
-def test_funnel_params():
-    """Test funnel params."""
-    params = FunnelParams(
-        measures=[
-            Measure(event="view_product", aggregator="COUNT"),
-            Measure(event="add_to_cart", aggregator="COUNT"),
-        ],
-        window=7,
-        startDate="2024-01-01",
-        endDate="2024-01-31",
+def test_funnel_request():
+    params = FunnelReportRequest(
+        funnel={"steps": [{"event_name": "view_product"}]},
+        fromDate="2024-01-01",
+        toDate="2024-01-31",
     )
-    assert len(params.measures) == 2
-    assert params.window == 7
+    assert params.funnel is not None
+    assert params.from_date == "2024-01-01"
 
 
-def test_funnel_report():
-    """Test funnel report."""
-    report = FunnelReport(
-        steps=[
-            FunnelStep(step=1, event="view_product", total=1000, conversion_rate=100.0),
-            FunnelStep(step=2, event="add_to_cart", total=500, conversion_rate=50.0),
-        ],
-        total=1000,
-        overall_conversion=50.0,
+def test_funnel_response():
+    report = FunnelReportResponse(
+        metadata_columns={"step": "string", "count": "number"},
+        detail_rows=[["step1", 100], ["step2", 50]],
     )
-    assert len(report.steps) == 2
-    assert report.total == 1000
+    assert report.metadata_columns is not None
+    assert len(report.detail_rows) == 2
 
 
-def test_retention_params():
-    """Test retention params."""
-    params = RetentionParams(
-        initial_event="sign_up",
-        return_event="login",
-        periods=[1, 3, 7, 14, 30],
+def test_retention_request():
+    params = RetentionReportRequest(
+        fromDate="2024-01-01",
+        toDate="2024-01-31",
+        duration=7,
     )
-    assert params.initial_event == "sign_up"
-    assert params.periods == [1, 3, 7, 14, 30]
+    assert params.from_date == "2024-01-01"
+    assert params.duration == 7
 
 
-def test_retention_report():
-    """Test retention report."""
-    report = RetentionReport(
-        data=[
-            RetentionData(period=1, retention_rate=80.0, returned_users=800, total_users=1000),
-            RetentionData(period=3, retention_rate=60.0, returned_users=600, total_users=1000),
-        ],
-        cohort_size=1000,
+def test_retention_response():
+    report = RetentionReportResponse(
+        metadata_columns={"period": "int", "rate": "number"},
+        detail_rows=[[1, 0.8], [3, 0.6]],
     )
-    assert len(report.data) == 2
-    assert report.cohort_size == 1000
+    assert report.metadata_columns is not None
+    assert len(report.detail_rows) == 2

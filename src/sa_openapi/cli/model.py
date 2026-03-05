@@ -2,7 +2,7 @@
 
 import json
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import click
 
@@ -10,8 +10,8 @@ from .output import console, print_error, print_json, print_table
 
 
 def _camel_to_snake(name: str) -> str:
-    s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
-    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+    s1 = re.sub(r"(.)([A-Z][a-z]+)", r"_", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"_", s1).lower()
 
 
 def _normalize_params(value):
@@ -22,6 +22,7 @@ def _normalize_params(value):
         return [_normalize_params(v) for v in value]
     return value
 
+
 if TYPE_CHECKING:
     from ..client import SensorsAnalyticsClient
 
@@ -30,6 +31,39 @@ if TYPE_CHECKING:
 def model():
     """Model commands (funnel, retention, attribution)."""
     pass
+
+
+def _display_v1_report(report: Any, title: str) -> None:
+    """Display v1 report with metadata_columns and detail_rows."""
+    # Get metadata columns and detail rows
+    metadata = getattr(report, 'metadata_columns', None) or {}
+    detail_rows = getattr(report, 'detail_rows', None) or []
+    truncated = getattr(report, 'truncated', False)
+
+    # Convert metadata_columns dict to column names
+    columns = list(metadata.keys()) if metadata else []
+
+    # If no metadata, try to get columns from first row
+    if not columns and detail_rows:
+        # detail_rows is list of lists, infer column count
+        first_row = detail[0] if (detail := detail_rows) and detail else []
+        columns = [f"col_{i}" for i in range(len(first_row))]
+
+    # Build table rows
+    table_rows = []
+    for row in detail_rows:
+        if isinstance(row, (list, tuple)):
+            table_rows.append(dict(zip(columns, row, strict=False)))
+        else:
+            table_rows.append(row)
+
+    if table_rows:
+        print_table(table_rows, title=title)
+    else:
+        console.print("[yellow]No data returned[/yellow]")
+
+    if truncated:
+        console.print("[yellow]Warning: Results were truncated[/yellow]")
 
 
 @model.command("funnel-report")
@@ -45,24 +79,9 @@ def funnel_report(ctx, json_str, output_format):
         report = client.model.funnel_report(**params)
 
         if output_format == "json":
-            if hasattr(report, "model_dump"):
-                print_json(report.model_dump(by_alias=True))
-            else:
-                print_json(report)
+            print_json(report.model_dump(by_alias=True))
         else:
-            if hasattr(report, "steps"):
-                data = [s.model_dump(by_alias=True) for s in report.steps]
-                print_table(data, title="Funnel Report")
-                console.print(f"\n[bold]Total:[/bold] {report.total}")
-                console.print(f"[bold]Overall Conversion:[/bold] {report.overall_conversion:.2f}%")
-            else:
-                rows = report.get("detail_rows") or report.get("rows") or []
-                cols = report.get("metadata_columns") or report.get("columns") or []
-                if cols and rows and isinstance(rows[0], (list, tuple)):
-                    table_rows = [dict(zip(cols, r, strict=False)) for r in rows]
-                else:
-                    table_rows = rows if isinstance(rows, list) else [rows]
-                print_table(table_rows, title="Funnel Report")
+            _display_v1_report(report, "Funnel Report")
     except Exception as e:
         print_error(str(e))
         raise click.Abort() from e
@@ -81,20 +100,9 @@ def retention_report(ctx, json_str, output_format):
         report = client.model.retention_report(**params)
 
         if output_format == "json":
-            if hasattr(report, "model_dump"):
-                print_json(report.model_dump(by_alias=True))
-            else:
-                print_json(report)
+            print_json(report.model_dump(by_alias=True))
         else:
-            if hasattr(report, "data"):
-                data = [r.model_dump(by_alias=True) for r in report.data]
-                print_table(data, title="Retention Report")
-                console.print(f"\n[bold]Cohort Size:[/bold] {report.cohort_size}")
-            else:
-                rows = report.get("detail_rows") or report.get("rows") or []
-                cols = report.get("metadata_columns") or report.get("columns") or []
-                table_rows = [dict(zip(cols, r, strict=False)) for r in rows] if cols and rows else rows
-                print_table(table_rows, title="Retention Report")
+            _display_v1_report(report, "Retention Report")
     except Exception as e:
         print_error(str(e))
         raise click.Abort() from e
@@ -113,20 +121,9 @@ def attribution_report(ctx, json_str, output_format):
         report = client.model.attribution_report(**params)
 
         if output_format == "json":
-            if hasattr(report, "model_dump"):
-                print_json(report.model_dump(by_alias=True))
-            else:
-                print_json(report)
+            print_json(report.model_dump(by_alias=True))
         else:
-            if hasattr(report, "data"):
-                data = [a.model_dump(by_alias=True) for a in report.data]
-                print_table(data, title="Attribution Report")
-                console.print(f"\n[bold]Total Conversions:[/bold] {report.total_conversions}")
-            else:
-                rows = report.get("detail_rows") or report.get("rows") or []
-                cols = report.get("metadata_columns") or report.get("columns") or []
-                table_rows = [dict(zip(cols, r, strict=False)) for r in rows] if cols and rows else rows
-                print_table(table_rows, title="Attribution Report")
+            _display_v1_report(report, "Attribution Report")
     except Exception as e:
         print_error(str(e))
         raise click.Abort() from e
@@ -145,18 +142,17 @@ def sql(ctx, sql, limit, output_format):
         client: SensorsAnalyticsClient = ctx.obj["client"]
         result = client.model.sql_query(sql, limit=limit)
 
-        rows = []
-        columns = result.get("columns", [])
-        for row in result.get("rows", []):
-            rows.append(dict(zip(columns, row, strict=False)))
+        columns = result.columns or []
+        data = result.data or []
 
         if output_format == "json":
-            print_json(rows)
+            print_json(result.model_dump(by_alias=True))
         elif output_format == "csv":
             from .output import print_csv
-
+            rows = [dict(zip(columns, row, strict=False)) for row in data]
             print_csv(rows)
         else:
+            rows = [dict(zip(columns, row, strict=False)) for row in data]
             print_table(rows, title="SQL Query Results")
     except Exception as e:
         print_error(str(e))
@@ -168,7 +164,7 @@ def sql(ctx, sql, limit, output_format):
 @click.pass_context
 def explain_sql(ctx, sql):
     """Get SQL execution plan. (Not available in Model v1 API)"""
-    print_error("`explain-sql` is not supported by Model v1 API.")
+    print_error(" is not supported by Model v1 API.")
     raise click.Abort()
 
 
@@ -177,5 +173,5 @@ def explain_sql(ctx, sql):
 @click.pass_context
 def validate_sql(ctx, sql):
     """Validate SQL syntax. (Not available in Model v1 API)"""
-    print_error("`validate-sql` is not supported by Model v1 API.")
+    print_error(" is not supported by Model v1 API.")
     raise click.Abort()
