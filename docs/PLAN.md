@@ -415,41 +415,41 @@ class SensorsAnalyticsClient:
 #### CLI 功能清单
 
 **配置管理**:
-- [ ] `sa config init` - 交互式初始化
-- [ ] `sa config list` - 列出所有 profile
-- [ ] `sa config set-default` - 设置默认 profile
-- [ ] `sa config show` - 显示当前配置
+- [ ] `sa-openapi config init` - 交互式初始化
+- [ ] `sa-openapi config list` - 列出所有 profile
+- [ ] `sa-openapi config set-default` - 设置默认 profile
+- [ ] `sa-openapi config show` - 显示当前配置
 
 **Dashboard 命令**:
-- [ ] `sa dashboard list` - 列出概览分组
-- [ ] `sa dashboard get` - 获取指定分组
-- [ ] `sa dashboard bookmarks` - 列出书签
-- [ ] `sa dashboard bookmark-data` - 获取书签数据
-- [ ] `sa dashboard export` - 导出书签
+- [ ] `sa-openapi dashboard list` - 列出概览分组
+- [ ] `sa-openapi dashboard get` - 获取指定分组
+- [ ] `sa-openapi dashboard bookmarks` - 列出书签
+- [ ] `sa-openapi dashboard bookmark-data` - 获取书签数据
+- [ ] `sa-openapi dashboard export` - 导出书签
 
 **Channel 命令**:
-- [ ] `sa channel list` - 列出渠道
-- [ ] `sa channel list-links` - 列出链接
-- [ ] `sa channel get-link` - 获取链接详情
-- [ ] `sa channel link-data` - 获取链接数据
-- [ ] `sa channel export` - 导出链接数据
+- [ ] `sa-openapi channel list` - 列出渠道
+- [ ] `sa-openapi channel list-links` - 列出链接
+- [ ] `sa-openapi channel get-link` - 获取链接详情
+- [ ] `sa-openapi channel link-data` - 获取链接数据
+- [ ] `sa-openapi channel export` - 导出链接数据
 
 **Dataset 命令**:
-- [ ] `sa dataset list` - 列出数据集
-- [ ] `sa dataset get` - 获取数据集详情
-- [ ] `sa dataset sql-query` - 执行 SQL 查询
-- [ ] `sa dataset schema` - 获取 schema
-- [ ] `sa dataset saved-queries` - 列出保存的查询
-- [ ] `sa dataset create-query` - 创建保存的查询
-- [ ] `sa dataset delete-query` - 删除保存的查询
+- [ ] `sa-openapi dataset list` - 列出数据集
+- [ ] `sa-openapi dataset get` - 获取数据集详情
+- [ ] `sa-openapi dataset sql-query` - 执行 SQL 查询
+- [ ] `sa-openapi dataset schema` - 获取 schema
+- [ ] `sa-openapi dataset saved-queries` - 列出保存的查询
+- [ ] `sa-openapi dataset create-query` - 创建保存的查询
+- [ ] `sa-openapi dataset delete-query` - 删除保存的查询
 
 **Model 命令**:
-- [ ] `sa model funnel-report` - 漏斗分析
-- [ ] `sa model retention-report` - 留存分析
-- [ ] `sa model attribution-report` - 归因分析
-- [ ] `sa model sql` - 自定义 SQL 查询
-- [ ] `sa model explain-sql` - SQL 执行计划
-- [ ] `sa model validate-sql` - SQL 语法验证
+- [ ] `sa-openapi model funnel-report` - 漏斗分析
+- [ ] `sa-openapi model retention-report` - 留存分析
+- [ ] `sa-openapi model attribution-report` - 归因分析
+- [ ] `sa-openapi model sql` - 自定义 SQL 查询
+- [ ] `sa-openapi model explain-sql` - SQL 执行计划
+- [ ] `sa-openapi model validate-sql` - SQL 语法验证
 
 **输出格式**:
 - [ ] 表格格式（rich Table）

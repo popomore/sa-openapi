@@ -3,28 +3,125 @@ name: Publish to PyPI
 on:
   release:
     types: [published]
+  workflow_dispatch: # 允许手动触发
 
 jobs:
-  publish:
+  build:
+    name: Build distribution
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install build dependencies
+      - name: Extract and update version from tag
+        if: github.event_name == 'release'
         run: |
-          pip install build
+          # Remove 'v' prefix if present (e.g., v1.0.0 -> 1.0.0)
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          VERSION="${TAG_NAME#v}"
+          echo "Extracted version from tag '$TAG_NAME': $VERSION"
 
-      - name: Build package
-        run: python -m build
+          # Update version in src/sa_openapi/__init__.py and pyproject.toml
+          python3 << PYTHON_SCRIPT
+          import re
+
+          version = "$VERSION"
+
+          # Update src/sa_openapi/__init__.py
+          init_file = 'src/sa_openapi/__init__.py'
+          with open(init_file, 'r') as f:
+              content = f.read()
+          content = re.sub(
+              r"__version__ = ['\"][^'\"]+['\"]",
+              f"__version__ = '{version}'",
+              content
+          )
+          with open(init_file, 'w') as f:
+              f.write(content)
+
+          # Update pyproject.toml
+          with open('pyproject.toml', 'r') as f:
+              content = f.read()
+          content = re.sub(
+              r'^version = "[^"]+"',
+              f'version = "{version}"',
+              content,
+              count=1
+          )
+          with open('pyproject.toml', 'w') as f:
+              f.write(content)
+
+          print(f"Updated version to {version}")
+          PYTHON_SCRIPT
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.10"
+
+      - name: Create virtual environment
+        run: |
+          uv venv
+
+      - name: Install dependencies
+        run: |
+          uv pip install --group dev
+
+      - name: Build source distribution
+        run: |
+          # Build only source distribution (sdist)
+          # This allows users to install on any platform and Python version
+          uv run python -m build --sdist --outdir dist/
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/sa-openapi/
+
+    permissions:
+      id-token: write # IMPORTANT: 用于可信发布
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-to-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' # 只在手动触发时发布到 TestPyPI
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/sa-openapi/
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
