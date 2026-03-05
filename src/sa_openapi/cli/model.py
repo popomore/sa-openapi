@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-from .output import print_error, print_json, print_table
+from .output import console, print_error, print_json, print_table
 
 if TYPE_CHECKING:
     from ..client import SensorsAnalyticsClient
