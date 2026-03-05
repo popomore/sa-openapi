@@ -68,8 +68,10 @@ def patch_env(key, value):
     """Context manager to patch environment variable."""
     old = os.environ.get(key)
     os.environ[key] = value
-    yield
-    if old is None:
-        del os.environ[key]
-    else:
-        os.environ[key] = old
+    try:
+        yield
+    finally:
+        if old is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = old

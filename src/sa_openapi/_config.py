@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -105,12 +106,21 @@ class ConfigManager:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         with self.config_path.open("w", encoding="utf-8") as f:
             toml.dump(self._config, f)
+        with suppress(OSError):
+            self.config_path.chmod(0o600)
 
     def set_default_profile(self, profile: str) -> None:
         """Set default profile."""
-        if "default" in self._config:
-            del self._config["default"]
-        default_section = self._config.pop(profile, None)
-        if default_section:
-            self._config["default"] = default_section
-            self._save_to_file()
+        if profile == "default":
+            if "default" not in self._config:
+                raise ValueError("Default profile does not exist")
+            return
+
+        default_section = self._config.get(profile)
+        if default_section is None:
+            raise ValueError(f"Profile '{profile}' not found")
+
+        self._config["default"] = default_section
+        del self._config[profile]
+        self._save_to_file()
+

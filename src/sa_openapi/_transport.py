@@ -49,26 +49,33 @@ class Transport:
         headers = self.auth.inject_headers(headers)
         kwargs["headers"] = headers
 
-        # Retry logic
+        method_upper = method.upper()
+        # Always attempt at least once. Treat max_retries as total attempts.
+        attempts = max(1, self.config.max_retries)
+        retryable = method_upper in {"GET", "HEAD", "OPTIONS"}
+
         last_exception: Exception | None = None
-        for attempt in range(self.config.max_retries):
+        for attempt in range(attempts):
             try:
-                response = self._client.request(method, url, **kwargs)
+                response = self._client.request(method_upper, url, **kwargs)
                 return self._handle_response(response)
             except httpx.TimeoutException as e:
                 last_exception = TimeoutError(str(e))
-                if attempt < self.config.max_retries - 1:
-                    wait_time = 2**attempt
-                    time.sleep(wait_time)
+                if retryable and attempt < attempts - 1:
+                    time.sleep(2**attempt)
+                    continue
+                raise last_exception from e
             except httpx.NetworkError as e:
                 last_exception = NetworkError(str(e))
-                if attempt < self.config.max_retries - 1:
-                    wait_time = 2**attempt
-                    time.sleep(wait_time)
+                if retryable and attempt < attempts - 1:
+                    time.sleep(2**attempt)
+                    continue
+                raise last_exception from e
             except httpx.HTTPStatusError as e:
                 # Don't retry on HTTP errors
                 return self._handle_response(e.response)
 
+        # Should be unreachable due to raises above, but keep a safe fallback.
         raise last_exception if last_exception else NetworkError("Request failed")
 
     def _handle_response(self, response: httpx.Response) -> httpx.Response:
@@ -96,6 +103,14 @@ class Transport:
 
                     if error_code == "VALIDATION_ERROR":
                         raise ValidationError(message)
+                    if error_code == "AUTH_ERROR":
+                        raise AuthenticationError(message)
+                    if error_code == "NOT_FOUND":
+                        raise NotFoundError(message)
+                    if error_code == "RATE_LIMIT_ERROR":
+                        raise RateLimitError(message)
+                    if error_code == "TIMEOUT_ERROR":
+                        raise TimeoutError(message)
                     raise ServerError(f"{error_code}: {message}")
         except (ValueError, httpx.HTTPStatusError):
             pass

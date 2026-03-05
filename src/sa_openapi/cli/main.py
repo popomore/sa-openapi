@@ -42,7 +42,7 @@ def cli(ctx, profile, base_url, api_key, project):
 
     # Override with CLI options
     if base_url:
-        cfg.base_url = base_url
+        cfg.base_url = base_url.rstrip("/")
     if api_key:
         cfg.api_key = api_key
     if project:

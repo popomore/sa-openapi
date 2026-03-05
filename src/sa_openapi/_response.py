@@ -85,7 +85,9 @@ def unwrap_response(response: httpx.Response) -> Any:
             from ._exceptions import (
                 AuthenticationError,
                 NotFoundError,
+                RateLimitError,
                 ServerError,
+                TimeoutError,
                 ValidationError,
             )
 
@@ -93,6 +95,8 @@ def unwrap_response(response: httpx.Response) -> Any:
                 "VALIDATION_ERROR": ValidationError,
                 "NOT_FOUND": NotFoundError,
                 "AUTH_ERROR": AuthenticationError,
+                "RATE_LIMIT_ERROR": RateLimitError,
+                "TIMEOUT_ERROR": TimeoutError,
             }
 
             exc_class = error_map.get(error_code, ServerError)

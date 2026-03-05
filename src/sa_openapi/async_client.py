@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 import httpx
@@ -9,6 +10,15 @@ from typing_extensions import Self
 
 from ._auth import AuthHandler
 from ._config import ClientConfig
+from ._exceptions import (
+    AuthenticationError,
+    NetworkError,
+    NotFoundError,
+    RateLimitError,
+    ServerError,
+    TimeoutError,
+    ValidationError,
+)
 
 
 class AsyncTransport:
@@ -32,12 +42,72 @@ class AsyncTransport:
         url: str,
         **kwargs: Any,
     ) -> httpx.Response:
-        """Make HTTP request."""
+        """Make HTTP request with retry logic and error mapping."""
         headers = kwargs.pop("headers", {})
         headers = self.auth.inject_headers(headers)
         kwargs["headers"] = headers
 
-        response = await self._client.request(method, url, **kwargs)
+        method_upper = method.upper()
+        attempts = max(1, self.config.max_retries)
+        retryable = method_upper in {"GET", "HEAD", "OPTIONS"}
+
+        last_exception: Exception | None = None
+        for attempt in range(attempts):
+            try:
+                response = await self._client.request(method_upper, url, **kwargs)
+                return self._handle_response(response)
+            except httpx.TimeoutException as e:
+                last_exception = TimeoutError(str(e))
+                if retryable and attempt < attempts - 1:
+                    await asyncio.sleep(2**attempt)
+                    continue
+                raise last_exception from e
+            except httpx.NetworkError as e:
+                last_exception = NetworkError(str(e))
+                if retryable and attempt < attempts - 1:
+                    await asyncio.sleep(2**attempt)
+                    continue
+                raise last_exception from e
+
+        raise last_exception if last_exception else NetworkError("Request failed")
+
+
+    def _handle_response(self, response: httpx.Response) -> httpx.Response:
+        """Handle HTTP response and map to exceptions (same contract as sync)."""
+        if response.status_code == 401:
+            raise AuthenticationError("Invalid API key")
+        if response.status_code == 403:
+            raise AuthenticationError("Access forbidden")
+        if response.status_code == 404:
+            raise NotFoundError("Resource not found")
+        if response.status_code == 429:
+            raise RateLimitError("Rate limit exceeded")
+        if response.status_code >= 500:
+            raise ServerError(f"Server error: {response.status_code}")
+
+        try:
+            data = response.json()
+            if isinstance(data, dict):
+                code = data.get("code", "SUCCESS")
+                if code != "SUCCESS":
+                    message = data.get("message", "API error")
+                    error_info = data.get("error_info", {})
+                    error_code = error_info.get("code", code) if isinstance(error_info, dict) else code
+
+                    if error_code == "VALIDATION_ERROR":
+                        raise ValidationError(message)
+                    if error_code == "AUTH_ERROR":
+                        raise AuthenticationError(message)
+                    if error_code == "NOT_FOUND":
+                        raise NotFoundError(message)
+                    if error_code == "RATE_LIMIT_ERROR":
+                        raise RateLimitError(message)
+                    if error_code == "TIMEOUT_ERROR":
+                        raise TimeoutError(message)
+                    raise ServerError(f"{error_code}: {message}")
+        except ValueError:
+            pass
+
         return response
 
     async def get(self, url: str, **kwargs: Any) -> httpx.Response:
@@ -68,7 +138,7 @@ class AsyncDashboardService:
             params={"type": type},
         )
         data = response.json()
-        from ..models.dashboard import Navigation
+        from .models.dashboard import Navigation
 
         return [Navigation(**item) for item in data.get("data", [])]
 
@@ -85,7 +155,7 @@ class AsyncChannelService:
         """Get channel list."""
         response = await self._transport.get(f"{self._base_url}/channel")
         data = response.json()
-        from ..models.channel import Channel
+        from .models.channel import Channel
 
         return [Channel(**item) for item in data.get("data", [])]
 
@@ -102,7 +172,7 @@ class AsyncDatasetService:
         """Get dataset list."""
         response = await self._transport.get(f"{self._base_url}/dataset")
         data = response.json()
-        from ..models.dataset import Dataset
+        from .models.dataset import Dataset
 
         return [Dataset(**item) for item in data.get("data", [])]
 
@@ -135,10 +205,8 @@ class AsyncSensorsAnalyticsClient:
             timeout=timeout,
             max_retries=max_retries,
         )
-        self._transport = AsyncTransport(
-            self.config, AuthHandler(api_key, project)
-        )
         self._auth = AuthHandler(api_key, project)
+        self._transport = AsyncTransport(self.config, self._auth)
 
         # Initialize services
         self.dashboard = AsyncDashboardService(self._transport, self._auth)
