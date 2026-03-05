@@ -1,10 +1,12 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0", "setuptools-scm[toml]>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
 
 [project]
 name = "sa-openapi"
-version = "0.1.0"
+dynamic = ["version"]
 description = "SensorsData Analytics OpenAPI Python SDK and CLI"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -69,17 +71,10 @@ Homepage = "https://github.com/popomore/sa-openapi"
 Repository = "https://github.com/popomore/sa-openapi"
 Issues = "https://github.com/popomore/sa-openapi/issues"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/sa_openapi"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-    "/tests",
-    "/docs",
-    "/README.md",
-    "/pyproject.toml",
-]
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
