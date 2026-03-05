@@ -49,13 +49,14 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --cov=sa_openapi --cov-report=xml --cov-report=term
+          pytest --cov=sa_openapi --cov-branch --cov-report=xml --cov-report=term
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         with:
-          file: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
           fail_ci_if_error: false
 
   build:
