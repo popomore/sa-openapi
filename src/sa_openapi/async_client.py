@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import Any
-from typing_extensions import Self
 
 import httpx
+from typing_extensions import Self
 
 from ._auth import AuthHandler
 from ._config import ClientConfig
