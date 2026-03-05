@@ -7,6 +7,8 @@ from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+
 try:
     import tomllib as tomli  # Python 3.11+
 except ImportError:  # pragma: no cover
@@ -33,14 +35,14 @@ class ClientConfig:
         self.max_retries = max_retries
 
     @property
-    def dashboard_base_url(self) -> str:
-        """Dashboard/Channel/Dataset base path."""
+    def dashboard_v1_base_url(self) -> str:
+        """Dashboard/Channel/Dataset base path (v1 API)."""
         return f"{self.base_url}/api/v3/analytics/v1"
 
     @property
-    def model_base_url(self) -> str:
-        """Model service base path."""
-        return f"{self.base_url}/api/v3/analytics/v2"
+    def model_v1_base_url(self) -> str:
+        """Model service base path (v1 API)."""
+        return f"{self.base_url}/api/v3/analytics/v1"
 
 
 class ConfigManager:
@@ -56,6 +58,9 @@ class ConfigManager:
     def _load_config(self) -> None:
         """Load configuration from file and environment variables."""
         # Load from file
+
+        load_dotenv()
+
         if self.config_path.exists():
             with self.config_path.open("rb") as f:
                 self._config = tomli.load(f)
@@ -123,4 +128,3 @@ class ConfigManager:
         self._config["default"] = default_section
         del self._config[profile]
         self._save_to_file()
-

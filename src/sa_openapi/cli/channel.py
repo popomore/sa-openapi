@@ -82,7 +82,9 @@ def get_link(ctx, link_id, output_format):
 @click.argument("link_id", type=int)
 @click.option("--start-date", required=True, help="Start date (YYYY-MM-DD)")
 @click.option("--end-date", required=True, help="End date (YYYY-MM-DD)")
-@click.option("--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table")
+@click.option(
+    "--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table"
+)
 @click.pass_context
 def get_link_data(ctx, link_id, start_date, end_date, output_format):
     """Get link data."""
@@ -101,6 +103,7 @@ def get_link_data(ctx, link_id, start_date, end_date, output_format):
             print_json(rows)
         elif output_format == "csv":
             from .output import print_csv
+
             print_csv(rows)
         else:
             print_table(rows, title=f"Link {link_id} Data")

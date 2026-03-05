@@ -14,16 +14,27 @@ class DashboardType(str, Enum):
 
 
 class Navigation(BaseModel):
-    """Dashboard navigation model."""
+    """Dashboard navigation model.
+
+    API list 返回: id, title, dashboards
+    API get 返回: id, name, type, ownerId, createdAt, updatedAt
+    """
 
     id: int
-    name: str
-    type: DashboardType
-    owner_id: int = Field(alias="ownerId")
-    created_at: datetime = Field(alias="createdAt")
+    name: str | None = None  # get 接口
+    title: str | None = None  # list 接口
+    type: DashboardType | str | None = None
+    owner_id: int | None = Field(None, alias="ownerId")
+    created_at: datetime | None = Field(None, alias="createdAt")
     updated_at: datetime | None = Field(None, alias="updatedAt")
+    dashboards: list = Field(default_factory=list)
 
     model_config = {"populate_by_name": True}
+
+    @property
+    def display_name(self) -> str:
+        """显示名称, 兼容 name 和 title."""
+        return self.name or self.title or str(self.id)
 
 
 class Bookmark(BaseModel):

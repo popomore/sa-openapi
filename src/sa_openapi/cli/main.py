@@ -3,11 +3,17 @@
 import click
 
 from .._config import ConfigManager
+from .._log import setup_logging
 from ..client import SensorsAnalyticsClient
 from . import channel, config, dashboard, dataset, model
 
 
 @click.group()
+@click.option(
+    "--debug",
+    is_flag=True,
+    help="Enable debug output",
+)
 @click.option(
     "--profile",
     default="default",
@@ -26,8 +32,10 @@ from . import channel, config, dashboard, dataset, model
     help="Override project",
 )
 @click.pass_context
-def cli(ctx, profile, base_url, api_key, project):
+def cli(ctx, debug, profile, base_url, api_key, project):
     """Sensors Analytics CLI."""
+    setup_logging(debug=debug)
+
     # If running config commands, no need for client
     if ctx.invoked_subcommand in ("config",):
         return

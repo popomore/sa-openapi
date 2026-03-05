@@ -3,7 +3,7 @@
 from typing import Any
 
 from .._auth import AuthHandler
-from .._transport import Transport
+from .._transport import AiohttpTransport
 from ..models.common import QueryResult
 from ..models.dataset import (
     CreateSavedQueryParams,
@@ -13,25 +13,25 @@ from ..models.dataset import (
 )
 
 
-class DatasetService:
+class DatasetServiceV1:
     """Dataset service for Sensors Analytics."""
 
-    def __init__(self, transport: Transport, auth: AuthHandler):
+    def __init__(self, transport: AiohttpTransport, auth: AuthHandler):
         self._transport = transport
         self._auth = auth
-        self._base_url = transport.config.dashboard_base_url
+        self._base_url = transport.config.dashboard_v1_base_url
 
-    def list_dataset(self) -> list[Dataset]:
+    async def list_dataset(self) -> list[Dataset]:
         """Get dataset list.
 
         Returns:
             List of datasets
         """
-        response = self._transport.get(f"{self._base_url}/dataset")
+        response = await self._transport.get(f"{self._base_url}/dataset")
         data = response.json()
         return [Dataset(**item) for item in data.get("data", [])]
 
-    def get_dataset(self, dataset_id: int) -> Dataset:
+    async def get_dataset(self, dataset_id: int) -> Dataset:
         """Get specific dataset.
 
         Args:
@@ -40,13 +40,13 @@ class DatasetService:
         Returns:
             Dataset details
         """
-        response = self._transport.get(
+        response = await self._transport.get(
             f"{self._base_url}/dataset/{dataset_id}",
         )
         data = response.json()
         return Dataset(**data.get("data", {}))
 
-    def sql_query(
+    async def sql_query(
         self,
         dataset_id: int,
         sql: str,
@@ -70,14 +70,14 @@ class DatasetService:
         if offset is not None:
             params["offset"] = offset
 
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/dataset/{dataset_id}/data",
             json=params,
         )
         data = response.json()
         return QueryResult(**data.get("data", {}))
 
-    def get_schema(self, dataset_id: int) -> Schema:
+    async def get_schema(self, dataset_id: int) -> Schema:
         """Get dataset schema.
 
         Args:
@@ -86,13 +86,13 @@ class DatasetService:
         Returns:
             Dataset schema
         """
-        response = self._transport.get(
+        response = await self._transport.get(
             f"{self._base_url}/dataset/{dataset_id}/schema",
         )
         data = response.json()
         return Schema(**data.get("data", {}))
 
-    def list_saved_query(self, dataset_id: int) -> list[SavedQuery]:
+    async def list_saved_query(self, dataset_id: int) -> list[SavedQuery]:
         """Get saved query list for dataset.
 
         Args:
@@ -101,13 +101,13 @@ class DatasetService:
         Returns:
             List of saved queries
         """
-        response = self._transport.get(
+        response = await self._transport.get(
             f"{self._base_url}/dataset/{dataset_id}/saved_query",
         )
         data = response.json()
         return [SavedQuery(**item) for item in data.get("data", [])]
 
-    def create_saved_query(
+    async def create_saved_query(
         self,
         dataset_id: int,
         name: str,
@@ -130,20 +130,20 @@ class DatasetService:
             sql=sql,
             description=description,
         )
-        response = self._transport.post(
+        response = await self._transport.post(
             f"{self._base_url}/dataset/{dataset_id}/saved_query",
             json=params.model_dump(by_alias=True, exclude_none=True),
         )
         data = response.json()
         return SavedQuery(**data.get("data", {}))
 
-    def delete_saved_query(self, dataset_id: int, query_id: int) -> None:
+    async def delete_saved_query(self, dataset_id: int, query_id: int) -> None:
         """Delete saved query.
 
         Args:
             dataset_id: Dataset ID
             query_id: Query ID
         """
-        self._transport.delete(
+        await self._transport.delete(
             f"{self._base_url}/dataset/{dataset_id}/saved_query/{query_id}",
         )
