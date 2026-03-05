@@ -2,7 +2,7 @@
 
 import click
 
-from .._config import ClientConfig, ConfigManager
+from .._config import ConfigManager
 from ..client import SensorsAnalyticsClient
 from . import channel, config, dashboard, dataset, model
 

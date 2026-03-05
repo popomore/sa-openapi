@@ -2,20 +2,12 @@
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 from typing import Any, Self
 
 import httpx
 
 from ._auth import AuthHandler
 from ._config import ClientConfig
-from ._transport import Transport
-from .services import (
-    ChannelService,
-    DashboardService,
-    DatasetService,
-    ModelService,
-)
 
 
 class AsyncTransport:

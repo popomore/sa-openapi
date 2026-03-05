@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
+
+if TYPE_CHECKING:
+    import httpx
 
 T = TypeVar("T")
 

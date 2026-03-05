@@ -5,14 +5,10 @@ from typing import Any
 from .._auth import AuthHandler
 from .._transport import Transport
 from ..models.model import (
-    AttributionParams,
     AttributionReport,
-    FunnelParams,
     FunnelReport,
-    RetentionParams,
     RetentionReport,
     SqlExplainResult,
-    SqlQueryParams,
     SqlValidateResult,
 )
 

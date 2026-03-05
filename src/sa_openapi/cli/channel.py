@@ -1,9 +1,13 @@
 """Channel CLI commands."""
 
+from typing import TYPE_CHECKING
+
 import click
 
-from ..client import SensorsAnalyticsClient
 from .output import print_error, print_json, print_table
+
+if TYPE_CHECKING:
+    from ..client import SensorsAnalyticsClient
 
 
 @click.group()
@@ -29,7 +33,7 @@ def list_channels(ctx, output_format):
             print_table(data, title="Channels")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @channel.command("list-links")
@@ -42,7 +46,7 @@ def list_links(ctx, channel_id, output_format):
         client: SensorsAnalyticsClient = ctx.obj["client"]
         links = client.channel.list_link(channel_id=channel_id)
 
-        data = [l.model_dump(by_alias=True) for l in links]
+        data = [link.model_dump(by_alias=True) for link in links]
 
         if output_format == "json":
             print_json(data)
@@ -50,7 +54,7 @@ def list_links(ctx, channel_id, output_format):
             print_table(data, title=f"Links (Channel {channel_id})")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @channel.command("get-link")
@@ -71,7 +75,7 @@ def get_link(ctx, link_id, output_format):
             print_table([data], title=f"Link {link_id}")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @channel.command("link-data")
@@ -91,7 +95,7 @@ def get_link_data(ctx, link_id, start_date, end_date, output_format):
 
         rows = []
         for row in data.rows:
-            rows.append(dict(zip(data.columns, row)))
+            rows.append(dict(zip(data.columns, row, strict=False)))
 
         if output_format == "json":
             print_json(rows)
@@ -102,4 +106,4 @@ def get_link_data(ctx, link_id, start_date, end_date, output_format):
             print_table(rows, title=f"Link {link_id} Data")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e

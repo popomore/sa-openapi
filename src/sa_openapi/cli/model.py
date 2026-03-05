@@ -1,11 +1,14 @@
 """Model CLI commands."""
 
 import json
+from typing import TYPE_CHECKING
 
 import click
 
-from ..client import SensorsAnalyticsClient
 from .output import print_error, print_json, print_table
+
+if TYPE_CHECKING:
+    from ..client import SensorsAnalyticsClient
 
 
 @click.group()
@@ -36,7 +39,7 @@ def funnel_report(ctx, json_str, output_format):
             console.print(f"[bold]Overall Conversion:[/bold] {report.overall_conversion:.2f}%")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @model.command("retention-report")
@@ -59,7 +62,7 @@ def retention_report(ctx, json_str, output_format):
             console.print(f"\n[bold]Cohort Size:[/bold] {report.cohort_size}")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @model.command("attribution-report")
@@ -82,7 +85,7 @@ def attribution_report(ctx, json_str, output_format):
             console.print(f"\n[bold]Total Conversions:[/bold] {report.total_conversions}")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @model.command("sql")
@@ -99,7 +102,7 @@ def sql(ctx, sql, limit, output_format):
         rows = []
         columns = result.get("columns", [])
         for row in result.get("rows", []):
-            rows.append(dict(zip(columns, row)))
+            rows.append(dict(zip(columns, row, strict=False)))
 
         if output_format == "json":
             print_json(rows)
@@ -110,7 +113,7 @@ def sql(ctx, sql, limit, output_format):
             print_table(rows, title="SQL Query Results")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @model.command("explain-sql")
@@ -124,7 +127,7 @@ def explain_sql(ctx, sql):
         print_json(result.model_dump(by_alias=True))
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @model.command("validate-sql")
@@ -141,4 +144,4 @@ def validate_sql(ctx, sql):
             console.print(f"[red]✗[/red] {result.error}")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e

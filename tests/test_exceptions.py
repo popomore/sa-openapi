@@ -1,6 +1,5 @@
 """Tests for exceptions."""
 
-import pytest
 
 from sa_openapi._exceptions import (
     AuthenticationError,

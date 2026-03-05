@@ -1,10 +1,9 @@
 """Tests for config."""
 
 import os
+from contextlib import contextmanager
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from sa_openapi._config import ClientConfig, ConfigManager
 
@@ -39,7 +38,7 @@ def test_client_config_base_urls():
 def test_config_manager_default_path():
     """Test default config path."""
     manager = ConfigManager()
-    assert manager.DEFAULT_CONFIG_PATH == Path.home() / ".sa-openapi.toml"
+    assert Path.home() / ".sa-openapi.toml" == manager.DEFAULT_CONFIG_PATH
 
 
 def test_config_manager_with_custom_path():
@@ -64,6 +63,7 @@ def test_client_config_from_env():
             assert manager.get_default_profile().base_url == "https://env.sensorsdata.cn"
 
 
+@contextmanager
 def patch_env(key, value):
     """Context manager to patch environment variable."""
     old = os.environ.get(key)

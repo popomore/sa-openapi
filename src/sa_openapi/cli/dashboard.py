@@ -1,10 +1,13 @@
 """Dashboard CLI commands."""
 
+from typing import TYPE_CHECKING
+
 import click
 
-from .._config import ClientConfig, ConfigManager
-from ..client import SensorsAnalyticsClient
-from .output import console, print_error, print_json, print_table
+from .output import print_error, print_json, print_table
+
+if TYPE_CHECKING:
+    from ..client import SensorsAnalyticsClient
 
 
 @click.group()
@@ -31,7 +34,7 @@ def list_navigation(ctx, nav_type, output_format):
             print_table(data, title=f"Navigations ({nav_type})")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dashboard.command("bookmarks")
@@ -52,7 +55,7 @@ def list_bookmarks(ctx, navigation_id, output_format):
             print_table(data, title=f"Bookmarks (Navigation {navigation_id})")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dashboard.command("get")
@@ -73,7 +76,7 @@ def get_navigation(ctx, navigation_id, output_format):
             print_table([data], title=f"Navigation {navigation_id}")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dashboard.command("bookmark-data")
@@ -94,7 +97,7 @@ def get_bookmark_data(ctx, bookmark_id, start_date, end_date, output_format):
         # Convert to list of dicts
         rows = []
         for row in data.rows:
-            rows.append(dict(zip(data.columns, row)))
+            rows.append(dict(zip(data.columns, row, strict=False)))
 
         if output_format == "json":
             print_json(rows)
@@ -105,4 +108,4 @@ def get_bookmark_data(ctx, bookmark_id, start_date, end_date, output_format):
             print_table(rows, title=f"Bookmark {bookmark_id} Data")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e

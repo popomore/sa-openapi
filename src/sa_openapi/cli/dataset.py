@@ -1,9 +1,13 @@
 """Dataset CLI commands."""
 
+from typing import TYPE_CHECKING
+
 import click
 
-from ..client import SensorsAnalyticsClient
 from .output import print_error, print_json, print_table
+
+if TYPE_CHECKING:
+    from ..client import SensorsAnalyticsClient
 
 
 @click.group()
@@ -29,7 +33,7 @@ def list_datasets(ctx, output_format):
             print_table(data, title="Datasets")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dataset.command("get")
@@ -50,7 +54,7 @@ def get_dataset(ctx, dataset_id, output_format):
             print_table([data], title=f"Dataset {dataset_id}")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dataset.command("schema")
@@ -71,7 +75,7 @@ def get_schema(ctx, dataset_id, output_format):
             print_table(data, title=f"Dataset {dataset_id} Schema")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dataset.command("sql-query")
@@ -88,7 +92,7 @@ def sql_query(ctx, dataset_id, sql, limit, output_format):
 
         rows = []
         for row in result.rows:
-            rows.append(dict(zip(result.columns, row)))
+            rows.append(dict(zip(result.columns, row, strict=False)))
 
         if output_format == "json":
             print_json(rows)
@@ -99,7 +103,7 @@ def sql_query(ctx, dataset_id, sql, limit, output_format):
             print_table(rows, title=f"Dataset {dataset_id} Query Results")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dataset.command("saved-queries")
@@ -120,7 +124,7 @@ def list_saved_queries(ctx, dataset_id, output_format):
             print_table(data, title=f"Saved Queries (Dataset {dataset_id})")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dataset.command("create-query")
@@ -139,7 +143,7 @@ def create_query(ctx, dataset_id, name, sql, description):
         print_json(query.model_dump(by_alias=True))
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @dataset.command("delete-query")
@@ -154,4 +158,4 @@ def delete_query(ctx, dataset_id, query_id):
         click.echo(f"Query {query_id} deleted successfully")
     except Exception as e:
         print_error(str(e))
-        raise click.Abort()
+        raise click.Abort() from e

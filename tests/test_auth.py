@@ -1,6 +1,5 @@
 """Tests for auth."""
 
-import pytest
 
 from sa_openapi._auth import AuthHandler
 

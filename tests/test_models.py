@@ -1,14 +1,18 @@
 """Tests for models."""
 
-import pytest
-from datetime import datetime
 
-from sa_openapi.models.dashboard import DashboardType, Navigation, Bookmark
 from sa_openapi.models.channel import Channel, Link
-from sa_openapi.models.dataset import Dataset, Schema, SchemaField, SavedQuery
+from sa_openapi.models.dashboard import Bookmark, DashboardType, Navigation
+from sa_openapi.models.dataset import Dataset, Schema, SchemaField
 from sa_openapi.models.model import (
-    Measure, Filter, FunnelParams, FunnelStep, FunnelReport,
-    RetentionParams, RetentionData, RetentionReport,
+    Filter,
+    FunnelParams,
+    FunnelReport,
+    FunnelStep,
+    Measure,
+    RetentionData,
+    RetentionParams,
+    RetentionReport,
 )
 
 

@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from ._auth import AuthHandler
-from ._config import ClientConfig
 from ._exceptions import (
     AuthenticationError,
     NetworkError,
@@ -18,6 +16,10 @@ from ._exceptions import (
     TimeoutError,
     ValidationError,
 )
+
+if TYPE_CHECKING:
+    from ._auth import AuthHandler
+    from ._config import ClientConfig
 
 
 class Transport:
@@ -65,7 +67,7 @@ class Transport:
                     time.sleep(wait_time)
             except httpx.HTTPStatusError as e:
                 # Don't retry on HTTP errors
-                raise self._handle_response(e.response)
+                raise self._handle_response(e.response) from e
 
         raise last_exception or NetworkError("Request failed")
 

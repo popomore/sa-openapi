@@ -46,20 +46,20 @@ from .client import SensorsAnalyticsClient
 __version__ = "0.1.0"
 
 __all__ = [
-    # Version
-    "__version__",
-    # Client
-    "SensorsAnalyticsClient",
     "AsyncSensorsAnalyticsClient",
+    "AuthenticationError",
     "ClientConfig",
     "ConfigManager",
+    "NetworkError",
+    "NotFoundError",
+    "RateLimitError",
+    # Client
+    "SensorsAnalyticsClient",
     # Exceptions
     "SensorsAnalyticsError",
-    "AuthenticationError",
-    "NotFoundError",
-    "ValidationError",
-    "RateLimitError",
     "ServerError",
-    "NetworkError",
     "TimeoutError",
+    "ValidationError",
+    # Version
+    "__version__",
 ]

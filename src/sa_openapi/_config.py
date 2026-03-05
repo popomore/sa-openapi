@@ -56,7 +56,7 @@ class ConfigManager:
         """Load configuration from file and environment variables."""
         # Load from file
         if self.config_path.exists():
-            with open(self.config_path, "rb") as f:
+            with self.config_path.open("rb") as f:
                 self._config = tomli.load(f)
 
         # Override with environment variables
@@ -103,7 +103,7 @@ class ConfigManager:
     def _save_to_file(self) -> None:
         """Save configuration to file."""
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_path, "w", encoding="utf-8") as f:
+        with self.config_path.open("w", encoding="utf-8") as f:
             toml.dump(self._config, f)
 
     def set_default_profile(self, profile: str) -> None:

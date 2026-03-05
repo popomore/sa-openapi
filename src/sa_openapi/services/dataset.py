@@ -8,7 +8,6 @@ from ..models.common import QueryResult
 from ..models.dataset import (
     CreateSavedQueryParams,
     Dataset,
-    QueryParams,
     SavedQuery,
     Schema,
 )
