@@ -4,12 +4,9 @@ from sa_openapi.models.channel import Channel, Link
 from sa_openapi.models.dashboard import Bookmark, DashboardType, Navigation
 from sa_openapi.models.dataset import Dataset, Schema, SchemaField
 from sa_openapi.models.model import (
-    Filter,
-    FunnelReport,
     FunnelReportRequest,
     FunnelReportResponse,
     Measure,
-    RetentionReport,
     RetentionReportRequest,
     RetentionReportResponse,
 )
