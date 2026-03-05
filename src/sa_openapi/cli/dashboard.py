@@ -24,13 +24,16 @@ def list_navigation(ctx, nav_type, output_format):
     """List dashboard navigations."""
     try:
         client: SensorsAnalyticsClient = ctx.obj["client"]
-        navigations = client.dashboard.list_navigation(type=nav_type)
-
-        data = [n.model_dump(by_alias=True) for n in navigations]
+        navigations = client.dashboard.list_navigation(nav_type=nav_type)
 
         if output_format == "json":
+            data = [n.model_dump(by_alias=True) for n in navigations]
             print_json(data)
         else:
+            data = [
+                {"id": n.id, "name": n.display_name, "dashboards": len(n.dashboards)}
+                for n in navigations
+            ]
             print_table(data, title=f"Navigations ({nav_type})")
     except Exception as e:
         print_error(str(e))
@@ -83,7 +86,9 @@ def get_navigation(ctx, navigation_id, output_format):
 @click.argument("bookmark_id", type=int)
 @click.option("--start-date", required=True, help="Start date (YYYY-MM-DD)")
 @click.option("--end-date", required=True, help="End date (YYYY-MM-DD)")
-@click.option("--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table")
+@click.option(
+    "--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table"
+)
 @click.pass_context
 def get_bookmark_data(ctx, bookmark_id, start_date, end_date, output_format):
     """Get bookmark data."""
@@ -103,6 +108,7 @@ def get_bookmark_data(ctx, bookmark_id, start_date, end_date, output_format):
             print_json(rows)
         elif output_format == "csv":
             from .output import print_csv
+
             print_csv(rows)
         else:
             print_table(rows, title=f"Bookmark {bookmark_id} Data")

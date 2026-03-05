@@ -82,7 +82,9 @@ def get_schema(ctx, dataset_id, output_format):
 @click.option("--dataset-id", required=True, type=int, help="Dataset ID")
 @click.option("--sql", required=True, help="SQL query")
 @click.option("--limit", type=int, default=100, help="Result limit")
-@click.option("--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table")
+@click.option(
+    "--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table"
+)
 @click.pass_context
 def sql_query(ctx, dataset_id, sql, limit, output_format):
     """Execute SQL query on dataset."""
@@ -98,6 +100,7 @@ def sql_query(ctx, dataset_id, sql, limit, output_format):
             print_json(rows)
         elif output_format == "csv":
             from .output import print_csv
+
             print_csv(rows)
         else:
             print_table(rows, title=f"Dataset {dataset_id} Query Results")

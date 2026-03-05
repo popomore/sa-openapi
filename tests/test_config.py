@@ -31,8 +31,8 @@ def test_client_config_base_urls():
         project="default",
     )
 
-    assert config.dashboard_base_url == "https://example.sensorsdata.cn/api/v3/analytics/v1"
-    assert config.model_base_url == "https://example.sensorsdata.cn/api/v3/analytics/v2"
+    assert config.dashboard_v1_base_url == "https://example.sensorsdata.cn/api/v3/analytics/v1"
+    assert config.model_v1_base_url == "https://example.sensorsdata.cn/api/v3/analytics/v1"
 
 
 def test_config_manager_default_path():

@@ -1,6 +1,5 @@
 """Tests for exceptions."""
 
-
 from sa_openapi._exceptions import (
     AuthenticationError,
     NotFoundError,
