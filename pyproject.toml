@@ -48,7 +48,7 @@ dev = [
 ]
 
 [project.scripts]
-sa = "sa_openapi.cli.main:cli"
+sa-openapi = "sa_openapi.cli.main:cli"
 
 [project.urls]
 Homepage = "https://github.com/popomore/sa-openapi"

@@ -116,7 +116,7 @@ except SensorsAnalyticsError as e:
 首次使用需要配置认证信息：
 
 ```bash
-sa config init
+sa-openapi config init
 ```
 
 交互式配置会提示输入：
@@ -130,24 +130,24 @@ sa config init
 
 ```bash
 # 查看帮助
-sa --help
+sa-openapi --help
 
 # Dashboard 相关
-sa dashboard list                              # 列出所有概览分组
-sa dashboard bookmarks --navigation-id 123     # 列出指定分组的书签
+sa-openapi dashboard list                              # 列出所有概览分组
+sa-openapi dashboard bookmarks --navigation-id 123     # 列出指定分组的书签
 
 # Channel 相关
-sa channel list-links --channel-id 456         # 列出渠道链接
-sa channel get-link --link-id 789              # 获取链接详情
+sa-openapi channel list-links --channel-id 456         # 列出渠道链接
+sa-openapi channel get-link --link-id 789              # 获取链接详情
 
 # Dataset 相关
-sa dataset list                                # 列出所有数据集
-sa dataset sql-query --dataset-id 1 --sql "SELECT * FROM events LIMIT 10"
+sa-openapi dataset list                                # 列出所有数据集
+sa-openapi dataset sql-query --dataset-id 1 --sql "SELECT * FROM events LIMIT 10"
 
 # Model 相关
-sa model funnel-report --json '{...}'          # 漏斗分析报告
-sa model retention-report --json '{...}'       # 留存分析报告
-sa model sql --sql "SELECT ..."                # 自定义 SQL 查询
+sa-openapi model funnel-report --json '{...}'          # 漏斗分析报告
+sa-openapi model retention-report --json '{...}'       # 留存分析报告
+sa-openapi model sql --sql "SELECT ..."                # 自定义 SQL 查询
 ```
 
 #### 输出格式
@@ -156,13 +156,13 @@ sa model sql --sql "SELECT ..."                # 自定义 SQL 查询
 
 ```bash
 # 表格格式（默认）
-sa dashboard list
+sa-openapi dashboard list
 
 # JSON 格式
-sa dashboard list --format json
+sa-openapi dashboard list --format json
 
 # CSV 格式
-sa dashboard list --format csv
+sa-openapi dashboard list --format csv
 ```
 
 #### 多环境配置
@@ -171,10 +171,10 @@ sa dashboard list --format csv
 
 ```bash
 # 使用指定 profile
-sa --profile production dashboard list
+sa-openapi --profile production dashboard list
 
 # 设置默认 profile
-sa config set-default production
+sa-openapi config set-default production
 ```
 
 配置文件示例 (`~/.sa-openapi.toml`)：
@@ -205,7 +205,7 @@ export SA_BASE_URL="https://your-instance.sensorsdata.cn"
 export SA_API_KEY="sk-xxx"
 export SA_PROJECT="default"
 
-sa dashboard list
+sa-openapi dashboard list
 ```
 
 ## API 参考
