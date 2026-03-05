@@ -69,7 +69,7 @@ class Transport:
                 # Don't retry on HTTP errors
                 raise self._handle_response(e.response) from e
 
-        raise last_exception or NetworkError("Request failed")
+        raise last_exception if last_exception else NetworkError("Request failed")
 
     def _handle_response(self, response: httpx.Response) -> httpx.Response:
         """Handle HTTP response and map to exceptions."""

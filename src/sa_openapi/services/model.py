@@ -152,7 +152,7 @@ class ModelService:
         self,
         sql: str,
         limit: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> Any:
         """Execute custom SQL query.
 
         Args:
