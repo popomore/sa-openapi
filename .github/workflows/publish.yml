@@ -1,46 +1,61 @@
-name: Publish to PyPI
+name: Publish Python Package
 
 on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
   release:
     types: [published]
-  workflow_dispatch: # 允许手动触发
 
 jobs:
-  build:
-    name: Build distribution
+  test-and-build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install uv and Python
-        uses: astral-sh/setup-uv@v7
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
-
-      - name: Create virtual environment
-        run: |
-          uv venv
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install dependencies
         run: |
-          uv pip install --group dev
+          python -m pip install --upgrade pip
+          pip install build twine pytest pytest-cov ruff mypy
 
-      - name: Build source distribution
+      - name: Run tests
+        run: pytest
+
+      - name: Check types
+        run: mypy src/
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Build package
+        if: matrix.python-version == '3.12'
         run: |
-          # Build only source distribution (sdist)
-          # This allows users to install on any platform and Python version
-          uv run python -m build --sdist --outdir dist/
+          python -m build
+          python -m twine check dist/*
 
-      - name: Store the distribution packages
+      - name: Upload dist artifact
+        if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
 
-  publish-to-pypi:
-    name: Publish to PyPI
-    needs: build
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test-and-build
     runs-on: ubuntu-latest
 
     environment:
@@ -48,10 +63,11 @@ jobs:
       url: https://pypi.org/project/sa-openapi/
 
     permissions:
-      id-token: write # IMPORTANT: 用于可信发布
+      id-token: write
+      contents: read
 
     steps:
-      - name: Download all the dists
+      - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
@@ -59,28 +75,3 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-
-  publish-to-testpypi:
-    name: Publish to TestPyPI
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' # 只在手动触发时发布到 TestPyPI
-
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/project/sa-openapi/
-
-    permissions:
-      id-token: write
-
-    steps:
-      - name: Download all the dists
-        uses: actions/download-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/
-
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
