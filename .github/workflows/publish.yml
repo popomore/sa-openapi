@@ -13,47 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract and update version from tag
-        if: github.event_name == 'release'
-        run: |
-          # Remove 'v' prefix if present (e.g., v1.0.0 -> 1.0.0)
-          TAG_NAME="${{ github.event.release.tag_name }}"
-          VERSION="${TAG_NAME#v}"
-          echo "Extracted version from tag '$TAG_NAME': $VERSION"
-
-          # Update version in src/sa_openapi/__init__.py and pyproject.toml
-          python3 << PYTHON_SCRIPT
-          import re
-
-          version = "$VERSION"
-
-          # Update src/sa_openapi/__init__.py
-          init_file = 'src/sa_openapi/__init__.py'
-          with open(init_file, 'r') as f:
-              content = f.read()
-          content = re.sub(
-              r"__version__ = ['\"][^'\"]+['\"]",
-              f"__version__ = '{version}'",
-              content
-          )
-          with open(init_file, 'w') as f:
-              f.write(content)
-
-          # Update pyproject.toml
-          with open('pyproject.toml', 'r') as f:
-              content = f.read()
-          content = re.sub(
-              r'^version = "[^"]+"',
-              f'version = "{version}"',
-              content,
-              count=1
-          )
-          with open('pyproject.toml', 'w') as f:
-              f.write(content)
-
-          print(f"Updated version to {version}")
-          PYTHON_SCRIPT
-
       - name: Install uv and Python
         uses: astral-sh/setup-uv@v7
         with:
