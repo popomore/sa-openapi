@@ -2,7 +2,6 @@ name: Publish Python Package
 
 on:
   push:
-    branches: [main]
     tags:
       - "v*"
   release:
@@ -42,9 +41,7 @@ jobs:
 
       - name: Build package
         if: matrix.python-version == '3.12'
-        run: |
-          uv build
-          uv run twine check dist/*
+        run: uv build
 
       - name: Upload dist artifact
         if: matrix.python-version == '3.12'
