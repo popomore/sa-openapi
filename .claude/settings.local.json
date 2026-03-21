@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(done)",
+      "Bash(for f in docs/openapi/*.json:*)",
+      "Bash(wc:*)"
     ]
   }
 }
