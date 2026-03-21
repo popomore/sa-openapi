@@ -111,102 +111,61 @@ except SensorsAnalyticsError as e:
 
 ### CLI 工具
 
-#### 配置
+CLI 入口命令为 `sa-openapi`；在仓库开发环境里可以使用 `uv run sa-openapi`。
 
-首次使用需要配置认证信息：
+首次使用先初始化配置：
 
 ```bash
 sa-openapi config init
+sa-openapi config show
 ```
 
-交互式配置会提示输入：
-- Base URL（神策实例地址）
-- API Key
-- Project Name
-
-配置文件保存在 `~/.sa-openapi.toml`
-
-#### 基础命令
+常用命令示例：
 
 ```bash
 # 查看帮助
 sa-openapi --help
 
-# Dashboard 相关
-sa-openapi dashboard list                              # 列出所有概览分组
-sa-openapi dashboard bookmarks --navigation-id 123     # 列出指定分组的书签
+# Dashboard
+sa-openapi dashboard list --type PRIVATE
+sa-openapi dashboard bookmarks --navigation-id 123
+sa-openapi dashboard bookmark-data 456 --start-date 2026-03-01 --end-date 2026-03-07
 
-# Channel 相关
-sa-openapi channel list-links --channel-id 456         # 列出渠道链接
-sa-openapi channel get-link --link-id 789              # 获取链接详情
+# Channel
+sa-openapi channel list
+sa-openapi channel get-link 789
 
-# Dataset 相关
-sa-openapi dataset list                                # 列出所有数据集
-sa-openapi dataset sql-query --dataset-id 1 --sql "SELECT * FROM events LIMIT 10"
+# Dataset
+sa-openapi dataset list
+sa-openapi dataset sql-query --dataset-id 1 --sql "SELECT * FROM events LIMIT 10" --format csv
 
-# Model 相关
-sa-openapi model funnel-report --json '{...}'          # 漏斗分析报告
-sa-openapi model retention-report --json '{...}'       # 留存分析报告
-sa-openapi model sql --sql "SELECT ..."                # 自定义 SQL 查询
+# Model
+sa-openapi model funnel-report --json '{"measures":[{"event":"view_product","aggregator":"COUNT"}]}'
+sa-openapi model sql --sql "SELECT * FROM events LIMIT 10" --format json
 ```
 
-#### 输出格式
-
-支持三种输出格式：
+运行时可以通过全局选项临时覆盖配置：
 
 ```bash
-# 表格格式（默认）
-sa-openapi dashboard list
-
-# JSON 格式
-sa-openapi dashboard list --format json
-
-# CSV 格式
-sa-openapi dashboard list --format csv
+sa-openapi --profile production --debug dashboard list
+sa-openapi --base-url https://override.example.com --api-key sk-override dataset list
 ```
 
-#### 多环境配置
-
-支持配置多个环境（profile）：
-
-```bash
-# 使用指定 profile
-sa-openapi --profile production dashboard list
-
-# 设置默认 profile
-sa-openapi config set-default production
-```
-
-配置文件示例 (`~/.sa-openapi.toml`)：
-
-```toml
-[default]
-base_url = "https://your-instance.sensorsdata.cn"
-api_key = "sk-xxx"
-project = "default"
-
-[production]
-base_url = "https://prod.sensorsdata.cn"
-api_key = "sk-prod-xxx"
-project = "prod"
-
-[staging]
-base_url = "https://staging.sensorsdata.cn"
-api_key = "sk-staging-xxx"
-project = "staging"
-```
-
-#### 环境变量
-
-可以使用环境变量覆盖配置：
+支持的环境变量：
 
 ```bash
 export SA_BASE_URL="https://your-instance.sensorsdata.cn"
 export SA_API_KEY="sk-xxx"
 export SA_PROJECT="default"
-
-sa-openapi dashboard list
 ```
+
+详细 CLI 文档见 [docs/CLI.md](docs/CLI.md)，其中包含：
+
+- 全部命令组与子命令
+- 参数与输出格式说明
+- profile 配置方式
+- `model --json` 参数示例
+- 常见问题与排错建议
 
 ## API 参考
 

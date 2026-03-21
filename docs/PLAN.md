@@ -2,14 +2,29 @@
 
 ## 项目概述
 
-基于 4 个神策分析 OpenAPI 规范文件，实现完整的 Python SDK 和 CLI 工具。
+基于神策分析、神策数界、神策业务门户的 OpenAPI 规范文件，实现完整的 Python SDK 和 CLI 工具。
 
 **API 统计**:
-- Dashboard (v1): 6 个端点
-- Channel (v1): 5 个端点
-- Dataset (v1): 7 个端点
-- Model (v2): 6 个端点
-- **总计**: 24 个端点
+- **Analytics (神策分析)**: 7 个服务，33 个端点
+  - Dashboard (概览): 6 个端点
+  - Channel (渠道追踪): 5 个端点
+  - Dataset (业务集市): 1 个端点
+  - EventMeta (事件元数据): 2 个端点
+  - Model (分析模型): 5 个端点
+  - PropertyMeta (属性元数据): 6 个端点
+  - SmartAlarm (智能预警): 2 个端点
+- **Horizon (神策数界)**: 6 个服务，19 个端点
+  - Catalog (目录服务): 3 个端点
+  - DataSubscription (订阅管理): 7 个端点
+  - Schema (元数据管理): 3 个端点
+  - Segment (分群管理): 2 个端点
+  - Table (数据表服务): 3 个端点
+  - Tag (标签管理): 2 个端点
+- **Portal (神策业务门户)**: 3 个服务，12 个端点
+  - Identity (身份服务): 3 个端点
+  - Management (管理服务): 8 个端点
+  - ResourceManagement (资源管理服务): 4 个端点
+- **总计**: 16 个服务，64 个端点
 
 ## 实施阶段
 
@@ -45,9 +60,9 @@
 
 ---
 
-### Phase 2: Dashboard & Channel 服务 ✅ (已完成)
+### Phase 2: Analytics 核心服务
 
-**目标**: 实现前两个服务的完整功能
+**目标**: 实现 Analytics 的核心服务（Dashboard、Channel、EventMeta）
 
 #### Dashboard 服务 (6 个端点)
 
@@ -121,245 +136,371 @@ class LinkData(BaseModel):
     rows: list[list[Any]]
 ```
 
+#### EventMeta 服务 (2 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListEventsAll | GET | /event-meta/events/all | 获取事件列表 |
+| ListEventTags | GET | /event-meta/events/tags | 获取事件标签列表 |
+
+**数据模型**:
+```python
+# models/event_meta.py
+class Event(BaseModel):
+    id: int
+    name: str
+    cname: str
+    is_virtual: bool
+    tags: list[int]
+    comment: str | None = None
+    platforms: list[str]
+
+class EventTag(BaseModel):
+    id: int
+    name: str
+```
+
 #### 任务清单
 
 - [ ] 实现 Dashboard 数据模型
 - [ ] 实现 Dashboard 服务类
 - [ ] 实现 Channel 数据模型
 - [ ] 实现 Channel 服务类
+- [ ] 实现 EventMeta 数据模型
+- [ ] 实现 EventMeta 服务类
 - [ ] 编写 Dashboard 服务单元测试
 - [ ] 编写 Channel 服务单元测试
+- [ ] 编写 EventMeta 服务单元测试
 - [ ] 实现 CLI dashboard 命令
 - [ ] 实现 CLI channel 命令
+- [ ] 实现 CLI event-meta 命令
 
 **交付物**:
-- Dashboard 和 Channel 完整实现
+- Dashboard、Channel、EventMeta 完整实现
 - 单元测试（80%+ 覆盖率）
 - CLI 基础命令
 
-**预计时间**: 2 天
+**预计时间**: 3 天
 
 ---
 
-### Phase 3: Dataset 服务 ✅ (已完成)
+### Phase 3: Analytics 数据服务
 
-**目标**: 实现最复杂的 Dataset 服务
+**目标**: 实现 Analytics 的数据相关服务（Dataset、PropertyMeta）
 
-#### Dataset 服务 (7 个端点)
+#### Dataset 服务 (1 个端点)
 
 | 端点 | 方法 | 路径 | 描述 |
 |------|------|------|------|
-| QueryDataset | GET | /dataset | 获取数据集列表 |
-| GetDataset | GET | /dataset/{id} | 获取指定数据集 |
-| QueryDatasetData | POST | /dataset/{id}/data | 执行 SQL 查询 |
-| GetDatasetSchema | GET | /dataset/{id}/schema | 获取数据集 schema |
-| QueryDatasetSavedQuery | GET | /dataset/{id}/saved_query | 获取保存的查询 |
-| CreateDatasetSavedQuery | POST | /dataset/{id}/saved_query | 创建保存的查询 |
-| DeleteDatasetSavedQuery | DELETE | /dataset/{id}/saved_query/{query_id} | 删除保存的查询 |
+| DatasetDetail | GET | /dataset/detail | 查询业务模型详情信息 |
 
 **数据模型**:
 ```python
 # models/dataset.py
 class Dataset(BaseModel):
-    id: int
+    dataset_id: int
     name: str
     description: str | None = None
-    type: str
-    created_at: datetime = Field(alias="createdAt")
+    # 业务模型详细配置和结构信息
+```
 
-class QueryParams(BaseModel):
-    sql: str
-    limit: int | None = None
-    offset: int | None = None
+#### PropertyMeta 服务 (6 个端点)
 
-class QueryResult(BaseModel):
-    columns: list[str]
-    rows: list[list[Any]]
-    total: int
-    elapsed_ms: int = Field(alias="elapsedMs")
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListAllEventProperties | GET | /property-meta/event-properties/all | 获取所有事件属性 |
+| ListEventProperties | POST | /property-meta/event-properties | 获取指定的事件和相关属性 |
+| ListAllUserProperties | GET | /property-meta/user-properties/all | 获取所有用户属性列表 |
+| ListUserGroups | GET | /property-meta/user-groups/all | 获取所有用户分群列表 |
+| ListUserTagsWithDir | GET | /property-meta/user-tags/dir | 获取带有目录结构的用户标签列表 |
+| GetPropertyValues | POST | /property-meta/property/values | 获取属性候选值 |
 
-class SchemaField(BaseModel):
-    name: str
-    type: str
-    nullable: bool
-    comment: str | None = None
-
-class Schema(BaseModel):
-    fields: list[SchemaField]
-
-class SavedQuery(BaseModel):
+**数据模型**:
+```python
+# models/property_meta.py
+class EventProperty(BaseModel):
     id: int
     name: str
-    sql: str
-    dataset_id: int = Field(alias="datasetId")
-    created_at: datetime = Field(alias="createdAt")
+    cname: str
+    data_type: str
+    has_dict: bool
+
+class UserProperty(BaseModel):
+    id: int
+    name: str
+    cname: str
+    data_type: str
+
+class UserGroup(BaseModel):
+    id: int
+    name: str
+    cname: str
+
+class UserTag(BaseModel):
+    id: int
+    name: str
+    parent_id: int | None = None
 ```
 
 #### 任务清单
 
 - [ ] 实现 Dataset 数据模型
 - [ ] 实现 Dataset 服务类
-- [ ] 实现 SQL 查询功能
-- [ ] 实现 Schema 获取功能
-- [ ] 实现保存查询管理
+- [ ] 实现 PropertyMeta 数据模型
+- [ ] 实现 PropertyMeta 服务类
 - [ ] 编写 Dataset 服务单元测试
+- [ ] 编写 PropertyMeta 服务单元测试
 - [ ] 实现 CLI dataset 命令
-- [ ] 实现 SQL 查询 CLI 命令
+- [ ] 实现 CLI property-meta 命令
 
 **交付物**:
-- Dataset 服务完整实现
-- SQL 查询功能
+- Dataset 和 PropertyMeta 服务完整实现
 - 单元测试（80%+ 覆盖率）
-- CLI dataset 命令
+- CLI 命令
 
 **预计时间**: 2 天
 
 ---
 
-### Phase 4: Model 服务 ✅ (已完成)
+### Phase 4: Analytics 分析模型和预警服务
 
-**目标**: 实现分析模型服务（漏斗、留存、归因）
+**目标**: 实现 Analytics 的分析模型和智能预警服务（Model、SmartAlarm）
 
-#### Model 服务 (6 个端点)
+#### Model 服务 (5 个端点)
 
 | 端点 | 方法 | 路径 | 描述 |
 |------|------|------|------|
-| GetFunnelReport | POST | /model/funnel/report | 漏斗分析报告 |
-| GetRetentionReport | POST | /model/retention/report | 留存分析报告 |
-| GetAttributionReport | POST | /model/attribution/report | 归因分析报告 |
-| QueryModelData | POST | /model/data | 自定义 SQL 查询 |
-| ExplainModelSql | POST | /model/sql/explain | SQL 执行计划 |
-| ValidateModelSql | POST | /model/sql/validate | SQL 语法验证 |
+| QuerySegmentationReport | POST | /model/segmentation/report | 查询事件分析报告 |
+| QueryFunnelReport | POST | /model/funnel/report | 查询漏斗分析报告 |
+| QueryRetentionReport | POST | /model/retention/report | 查询留存分析报告 |
+| QueryIntervalReport | POST | /model/interval/report | 查询间隔分析报告 |
+| QueryAddictionReport | POST | /model/addiction/report | 查询分布分析报告 |
 
 **数据模型**:
 ```python
 # models/model.py
-class Measure(BaseModel):
-    """指标定义."""
-    event: str
-    aggregator: str  # COUNT, SUM, AVG, etc.
-    property: str | None = None
+class SegmentationReportRequest(BaseModel):
+    """事件分析请求参数."""
+    # 事件分析参数
 
-class Filter(BaseModel):
-    """筛选条件."""
-    property: str
-    operator: str  # =, !=, >, <, IN, etc.
-    value: Any
+class SegmentationReportResponse(BaseModel):
+    """事件分析报告响应."""
+    metadata_columns: dict[str, str]
+    truncated: bool
+    detail_rows: list[list[Any]]
 
-class ByField(BaseModel):
-    """分组字段."""
-    property: str
-    type: str | None = None
+class FunnelReportRequest(BaseModel):
+    """漏斗分析请求参数."""
+    # 漏斗分析参数
 
-class FunnelParams(BaseModel):
-    """漏斗分析参数."""
-    measures: list[Measure]
-    filter: Filter | None = None
-    by_fields: list[ByField] | None = Field(None, alias="byFields")
-    window: int | None = None  # 转化窗口期（天）
+class FunnelReportResponse(BaseModel):
+    """漏斗分析报告响应."""
+    # 漏斗分析结果
 
-class FunnelStep(BaseModel):
-    """漏斗步骤结果."""
-    step: int
-    event: str
-    total: int
-    conversion_rate: float = Field(alias="conversionRate")
-    avg_duration: float | None = Field(None, alias="avgDuration")
+class RetentionReportRequest(BaseModel):
+    """留存分析请求参数."""
+    # 留存分析参数
 
-class FunnelReport(BaseModel):
-    """漏斗分析报告."""
-    steps: list[FunnelStep]
-    total: int
-    overall_conversion: float = Field(alias="overallConversion")
+class RetentionReportResponse(BaseModel):
+    """留存分析报告响应."""
+    # 留存分析结果
 
-class RetentionParams(BaseModel):
-    """留存分析参数."""
-    initial_event: str = Field(alias="initialEvent")
-    return_event: str = Field(alias="returnEvent")
-    filter: Filter | None = None
-    by_fields: list[ByField] | None = Field(None, alias="byFields")
-    periods: list[int]  # 留存周期，如 [1, 3, 7, 14, 30]
+class IntervalReportRequest(BaseModel):
+    """间隔分析请求参数."""
+    # 间隔分析参数
 
-class RetentionData(BaseModel):
-    """留存数据."""
-    period: int
-    retention_rate: float = Field(alias="retentionRate")
-    returned_users: int = Field(alias="returnedUsers")
-    total_users: int = Field(alias="totalUsers")
+class IntervalReportResponse(BaseModel):
+    """间隔分析报告响应."""
+    # 间隔分析结果
 
-class RetentionReport(BaseModel):
-    """留存分析报告."""
-    data: list[RetentionData]
-    cohort_size: int = Field(alias="cohortSize")
+class AddictionReportRequest(BaseModel):
+    """分布分析请求参数."""
+    # 分布分析参数
 
-class AttributionParams(BaseModel):
-    """归因分析参数."""
-    conversion_event: str = Field(alias="conversionEvent")
-    touch_points: list[str] = Field(alias="touchPoints")
-    model: str  # FIRST_TOUCH, LAST_TOUCH, LINEAR, etc.
-    window: int | None = None
+class AddictionReportResponse(BaseModel):
+    """分布分析报告响应."""
+    # 分布分析结果
+```
 
-class AttributionData(BaseModel):
-    """归因数据."""
-    touch_point: str = Field(alias="touchPoint")
-    credit: float
-    conversions: int
+#### SmartAlarm 服务 (2 个端点)
 
-class AttributionReport(BaseModel):
-    """归因分析报告."""
-    data: list[AttributionData]
-    total_conversions: int = Field(alias="totalConversions")
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| QueryAlarmConfig | GET | /smart-alarm/detail | 获取一个预警配置的详细信息 |
+| QueryAllAlarms | POST | /smart-alarm/all | 获取所有的预警列表 |
 
-class SqlQueryParams(BaseModel):
-    """SQL 查询参数."""
-    sql: str
-    limit: int | None = None
-
-class SqlExplainResult(BaseModel):
-    """SQL 执行计划."""
-    plan: str
-    estimated_cost: float = Field(alias="estimatedCost")
-    estimated_rows: int = Field(alias="estimatedRows")
-
-class SqlValidateResult(BaseModel):
-    """SQL 验证结果."""
-    valid: bool
-    error: str | None = None
+**数据模型**:
+```python
+# models/smart_alarm.py
+class SmartAlarmConfig(BaseModel):
+    id: int
+    title: str
+    emails: list[str]
+    unit: str  # HOUR, DAY, WEEK, MONTH, YEAR
+    send_alarm: bool
+    history: dict | None = None
 ```
 
 #### 任务清单
 
-- [ ] 实现 Model 数据模型（漏斗）
-- [ ] 实现 Model 数据模型（留存）
-- [ ] 实现 Model 数据模型（归因）
+- [ ] 实现 Model 数据模型（事件分析）
+- [ ] 实现 Model 数据模型（漏斗分析）
+- [ ] 实现 Model 数据模型（留存分析）
+- [ ] 实现 Model 数据模型（间隔分析）
+- [ ] 实现 Model 数据模型（分布分析）
 - [ ] 实现 Model 服务类
-- [ ] 实现漏斗分析功能
-- [ ] 实现留存分析功能
-- [ ] 实现归因分析功能
-- [ ] 实现 SQL 查询/验证功能
+- [ ] 实现 SmartAlarm 数据模型
+- [ ] 实现 SmartAlarm 服务类
 - [ ] 编写 Model 服务单元测试
+- [ ] 编写 SmartAlarm 服务单元测试
 - [ ] 实现 CLI model 命令
+- [ ] 实现 CLI smart-alarm 命令
 
 **交付物**:
-- Model 服务完整实现（含 3 种分析类型）
-- SQL 查询和验证功能
+- Model 服务完整实现（含 5 种分析类型）
+- SmartAlarm 服务完整实现
 - 单元测试（80%+ 覆盖率）
-- CLI model 命令
+- CLI 命令
 
 **预计时间**: 3 天
 
 ---
 
-### Phase 5: 客户端集成 ✅ (已完成)
+### Phase 5: Horizon 服务（神策数界）
 
-**目标**: 整合所有服务到统一客户端
+**目标**: 实现 Horizon 的所有服务（Catalog、DataSubscription、Schema、Segment、Table、Tag）
+
+#### Catalog 服务 (3 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListCatalogTrees | POST | /catalog/tree/list | 查询目录树 |
+| BindCatalogResource | POST | /catalog/resource/bind | 挂载资源节点 |
+| UnbindCatalogResource | POST | /catalog/resource/unbind | 解绑资源节点 |
+
+#### DataSubscription 服务 (7 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| AddSubscriptionApplication | POST | /data-subscription/application/add | 创建订阅方 |
+| AppendSubscriptionApplicationConfig | POST | /data-subscription/application/config/append | 补充订阅方配置信息 |
+| GetSubscriptionApplication | POST | /data-subscription/application/get | 查询订阅方信息 |
+| DeleteSubscriptionApplication | POST | /data-subscription/application/delete | 删除订阅方 |
+| CreateDataSubscription | POST | /data-subscription/create | 创建数据订阅 |
+| ListDataSubscriptions | GET | /data-subscription/list | 批量查询订阅记录列表 |
+| BatchDeleteDataSubscriptions | POST | /data-subscription/batch-delete | 批量取消订阅 |
+
+#### Schema 服务 (3 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListEventSchemas | POST | /schema/event/list | 获取事件定义列表 |
+| GetEvent | POST | /schema/event/get | 获取事件定义 |
+| CreateEvent | POST | /schema/event/create | 创建事件定义 |
+
+#### Segment 服务 (2 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListSegmentDefinitions | POST | /segment/definition/list | 获取分群列表 |
+| GetSegmentDefinition | POST | /segment/definition/get | 获取分群信息 |
+
+#### Table 服务 (3 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListTables | POST | /table/list | 批量查询数据表信息 |
+| GetTable | POST | /table/get | 查询数据表信息 |
+| CreateTable | POST | /table/create | 创建数据表 |
+
+#### Tag 服务 (2 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListTagDefinitions | POST | /tag/definition/list | 查询标签列表 |
+| GetTagDefinition | POST | /tag/definition/get | 查询单个标签信息 |
+
+#### 任务清单
+
+- [ ] 实现 Catalog 数据模型和服务类
+- [ ] 实现 DataSubscription 数据模型和服务类
+- [ ] 实现 Schema 数据模型和服务类
+- [ ] 实现 Segment 数据模型和服务类
+- [ ] 实现 Table 数据模型和服务类
+- [ ] 实现 Tag 数据模型和服务类
+- [ ] 编写 Horizon 所有服务的单元测试
+- [ ] 实现 CLI horizon 命令
+
+**交付物**:
+- Horizon 6 个服务完整实现
+- 单元测试（80%+ 覆盖率）
+- CLI 命令
+
+**预计时间**: 4 天
+
+---
+
+### Phase 6: Portal 服务（神策业务门户）
+
+**目标**: 实现 Portal 的所有服务（Identity、Management、ResourceManagement）
+
+#### Identity 服务 (3 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListAccounts | GET | /identity/account/list | 获取账号列表 |
+| GetAccount | GET | /identity/account/get | 获取单个账号 |
+| GetAccountByName | GET | /identity/account/get-by-name | 通过名称获取单个账号 |
+
+#### Management 服务 (8 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListBehaviorDefines | GET | /management/behavior/define/list | 获取操作日志定义列表 |
+| ListBehaviors | GET | /management/behavior/list | 获取操作日志列表 |
+| GetLicenseProduct | GET | /management/license/product | 查询许可证组件 |
+| SendNoticeMessage | POST | /management/notice/send | 发送站内消息 |
+| GetAllProductVersion | GET | /management/product/versions | 查询产品版本信息 |
+| GetProjectByIdOrName | GET | /management/project/get | 获取项目详情 |
+| GetProjectsByAccountId | GET | /management/project/get-by-account-id | 按账号 ID 查询项目 |
+| ListProjects | GET | /management/project/list | 获取项目列表 |
+
+#### ResourceManagement 服务 (4 个端点)
+
+| 端点 | 方法 | 路径 | 描述 |
+|------|------|------|------|
+| ListAssets | POST | /resource-management/assets/list | 获取资源信息和使用量 |
+| ListAssetQuery | POST | /resource-management/assets/query/list | 获取资源相关查询任务 |
+| ListCompletedQueryTaskTable | GET | /resource-management/query/task/completed | 获取已完成查询任务 |
+| ListExecutingQueryTaskTable | GET | /resource-management/query/task/executing | 获取执行中查询任务 |
+
+#### 任务清单
+
+- [ ] 实现 Identity 数据模型和服务类
+- [ ] 实现 Management 数据模型和服务类
+- [ ] 实现 ResourceManagement 数据模型和服务类
+- [ ] 编写 Portal 所有服务的单元测试
+- [ ] 实现 CLI portal 命令
+
+**交付物**:
+- Portal 3 个服务完整实现
+- 单元测试（80%+ 覆盖率）
+- CLI 命令
+
+**预计时间**: 3 天
+
+---
+
+### Phase 7: 客户端集成
+
+**目标**: 整合所有 16 个服务到统一客户端
 
 #### 同步客户端
 
 ```python
 # client.py
-class SensorsAnalyticsClient:
-    """神策分析同步客户端."""
+class SensorsDataClient:
+    """神策数据同步客户端."""
 
     def __init__(
         self,
@@ -374,11 +515,27 @@ class SensorsAnalyticsClient:
         transport = Transport(...)
         auth = AuthHandler(...)
 
-        # 初始化服务
+        # Analytics 服务 (7 个)
         self.dashboard = DashboardService(transport, auth)
         self.channel = ChannelService(transport, auth)
         self.dataset = DatasetService(transport, auth)
+        self.event_meta = EventMetaService(transport, auth)
         self.model = ModelService(transport, auth)
+        self.property_meta = PropertyMetaService(transport, auth)
+        self.smart_alarm = SmartAlarmService(transport, auth)
+
+        # Horizon 服务 (6 个)
+        self.catalog = CatalogService(transport, auth)
+        self.data_subscription = DataSubscriptionService(transport, auth)
+        self.schema = SchemaService(transport, auth)
+        self.segment = SegmentService(transport, auth)
+        self.table = TableService(transport, auth)
+        self.tag = TagService(transport, auth)
+
+        # Portal 服务 (3 个)
+        self.identity = IdentityService(transport, auth)
+        self.management = ManagementService(transport, auth)
+        self.resource_management = ResourceManagementService(transport, auth)
 
     def __enter__(self) -> Self:
         return self
@@ -404,11 +561,11 @@ class SensorsAnalyticsClient:
 - 集成测试
 - 使用示例
 
-**预计时间**: 1 天
+**预计时间**: 2 天
 
 ---
 
-### Phase 6: CLI 完善 🔄 (进行中)
+### Phase 8: CLI 完善
 
 **目标**: 完善 CLI 工具的所有功能
 
@@ -474,11 +631,11 @@ class SensorsAnalyticsClient:
 - 多种输出格式支持
 - 多环境配置支持
 
-**预计时间**: 2 天
+**预计时间**: 3 天
 
 ---
 
-### Phase 7: 高级特性
+### Phase 9: 高级特性
 
 **目标**: 实现高级功能和优化
 
@@ -558,7 +715,7 @@ class Transport:
 
 ---
 
-### Phase 8: 测试和文档
+### Phase 10: 测试和文档
 
 **目标**: 达到发布标准
 
@@ -620,11 +777,11 @@ class Transport:
 - 类型检查通过
 - 代码质量检查通过
 
-**预计时间**: 2 天
+**预计时间**: 3 天
 
 ---
 
-### Phase 9: 发布准备
+### Phase 11: 发布准备
 
 **目标**: 准备 v0.1.0 发布
 
@@ -675,32 +832,37 @@ class Transport:
 
 | 阶段 | 内容 | 预计时间 | 累计时间 |
 |------|------|----------|----------|
-| Phase 1 | 基础框架 | 1 天 | 1 天 | ✅ |
-| Phase 2 | Dashboard & Channel | 2 天 | 3 天 | ✅ |
-| Phase 3 | Dataset 服务 | 2 天 | 5 天 | ✅ |
-| Phase 4 | Model 服务 | 3 天 | 8 天 | ✅ |
-| Phase 5 | 客户端集成 | 1 天 | 9 天 | ✅ |
-| Phase 6 | CLI 完善 | 2 天 | 11 天 |
-| Phase 7 | 高级特性 | 2 天 | 13 天 |
-| Phase 8 | 测试和文档 | 2 天 | 15 天 |
-| Phase 9 | 发布准备 | 1 天 | 16 天 |
+| Phase 1 | 基础框架 | 1 天 | 1 天 |
+| Phase 2 | Analytics 核心服务 (Dashboard, Channel, EventMeta) | 3 天 | 4 天 |
+| Phase 3 | Analytics 数据服务 (Dataset, PropertyMeta) | 2 天 | 6 天 |
+| Phase 4 | Analytics 分析模型和预警 (Model, SmartAlarm) | 3 天 | 9 天 |
+| Phase 5 | Horizon 服务 (6 个服务) | 4 天 | 13 天 |
+| Phase 6 | Portal 服务 (3 个服务) | 3 天 | 16 天 |
+| Phase 7 | 客户端集成 | 2 天 | 18 天 |
+| Phase 8 | CLI 完善 | 3 天 | 21 天 |
+| Phase 9 | 高级特性 | 2 天 | 23 天 |
+| Phase 10 | 测试和文档 | 3 天 | 26 天 |
+| Phase 11 | 发布准备 | 1 天 | 27 天 |
 
-**总计**: 约 16 个工作日（3-4 周）
+**总计**: 约 27 个工作日（5-6 周）
 
 ## 优先级
 
 ### P0 (必须)
-- Phase 1-5: 基础框架到客户端集成
-- Phase 6: 基础 CLI 命令
-- Phase 8: 基础测试（≥70% 覆盖率）
+- Phase 1: 基础框架
+- Phase 2-4: Analytics 所有服务（7 个服务）
+- Phase 7: 客户端集成
+- Phase 8: 基础 CLI 命令
+- Phase 10: 基础测试（≥70% 覆盖率）
 
 ### P1 (重要)
-- Phase 6: 完整 CLI 功能
-- Phase 7: 异步客户端
-- Phase 8: 完整测试（≥90% 覆盖率）
+- Phase 5-6: Horizon 和 Portal 服务（9 个服务）
+- Phase 8: 完整 CLI 功能
+- Phase 9: 异步客户端
+- Phase 10: 完整测试（≥90% 覆盖率）
 
 ### P2 (可选)
-- Phase 7: 分页迭代器、重试逻辑
+- Phase 9: 分页迭代器、重试逻辑
 - 性能优化
 - 批量操作 API
 
@@ -737,7 +899,8 @@ class Transport:
 ## 成功标准
 
 ### 功能完整性
-- ✅ 24 个 API 端点全部实现
+- ✅ 64 个 API 端点全部实现
+- ✅ 16 个服务全部可用
 - ✅ SDK 和 CLI 都可用
 - ✅ 同步和异步客户端
 
