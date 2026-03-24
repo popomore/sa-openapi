@@ -7,8 +7,8 @@ from .._transport import AiohttpTransport
 from ..models.channel import (
     Channel,
     ChannelUrlData,
-    CreateLinkResult,
     CreatedLinkItem,
+    CreateLinkResult,
     Link,
     LinkData,
     LinkDataParams,

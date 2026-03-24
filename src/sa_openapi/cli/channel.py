@@ -115,17 +115,17 @@ def get_link_data(ctx, link_id, start_date, end_date, output_format):
 
 @channel.command("create-link")
 @click.option("--channel-type", required=True, help="渠道类型: app_normal, app_deeplink, web_normal, mina_normal, alipay_mini_track")
-@click.option("--device-type", default="通用", help="设备类型，默认：通用")
-@click.option("--app-address", help="推广页面地址（APP 通用渠道）")
-@click.option("--target-url", help="目标地址（网页/小程序渠道）")
+@click.option("--device-type", default="通用", help="设备类型, 默认: 通用")
+@click.option("--app-address", help="推广页面地址 (APP 通用渠道)")
+@click.option("--target-url", help="目标地址 (网页/小程序渠道)")
 @click.option("--utm-source", help="utm_source 参数")
 @click.option("--utm-medium", help="utm_medium 参数")
 @click.option("--utm-campaign", help="utm_campaign 参数")
 @click.option("--utm-term", help="utm_term 参数")
 @click.option("--utm-content", help="utm_content 参数")
-@click.option("--application-name", help="Deeplink 应用名称（app_deeplink 类型必填）")
-@click.option("--web-landing-page", help="网页落地页（app_deeplink 类型）")
-@click.option("--json-input", "json_input", help="直接传入 JSON 格式的 channel_urls 列表（会覆盖其他参数）")
+@click.option("--application-name", help="Deeplink 应用名称 (app_deeplink 类型必填)")
+@click.option("--web-landing-page", help="网页落地页 (app_deeplink 类型)")
+@click.option("--json-input", "json_input", help="直接传入 JSON 格式的 channel_urls 列表 (会覆盖其他参数)")
 @click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
 @click.pass_context
 def create_link(
@@ -146,7 +146,7 @@ def create_link(
 ):
     """Create channel tracking link(s)."""
     try:
-        client: "SensorsAnalyticsClient" = ctx.obj["client"]
+        client: SensorsAnalyticsClient = ctx.obj["client"]
 
         if json_input:
             channel_urls = json.loads(json_input)
