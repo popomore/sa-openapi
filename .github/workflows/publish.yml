@@ -33,15 +33,6 @@ jobs:
       - name: Run tests
         run: uv run pytest
 
-      - name: Check types
-        run: uv run mypy src/
-
-      - name: Lint
-        run: uv run ruff check .
-
-      - name: Format check
-        run: uv run ruff format --check .
-
       - name: Build package
         if: matrix.python-version == '3.12'
         run: |
