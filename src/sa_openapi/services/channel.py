@@ -106,9 +106,7 @@ class ChannelServiceV1:
             for item in channel_urls
         ]
         payload = {
-            "channel_urls": [
-                item.model_dump(by_alias=True, exclude_none=True) for item in items
-            ]
+            "channel_urls": [item.model_dump(by_alias=True, exclude_none=True) for item in items]
         }
         response = await self._transport.post(
             f"{self._base_url}/channel/links/create",

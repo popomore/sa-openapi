@@ -114,7 +114,11 @@ def get_link_data(ctx, link_id, start_date, end_date, output_format):
 
 
 @channel.command("create-link")
-@click.option("--channel-type", required=True, help="渠道类型: app_normal, app_deeplink, web_normal, mina_normal, alipay_mini_track")
+@click.option(
+    "--channel-type",
+    required=True,
+    help="渠道类型: app_normal, app_deeplink, web_normal, mina_normal, alipay_mini_track",
+)
 @click.option("--device-type", default="通用", help="设备类型, 默认: 通用")
 @click.option("--app-address", help="推广页面地址 (APP 通用渠道)")
 @click.option("--target-url", help="目标地址 (网页/小程序渠道)")
@@ -125,7 +129,9 @@ def get_link_data(ctx, link_id, start_date, end_date, output_format):
 @click.option("--utm-content", help="utm_content 参数")
 @click.option("--application-name", help="Deeplink 应用名称 (app_deeplink 类型必填)")
 @click.option("--web-landing-page", help="网页落地页 (app_deeplink 类型)")
-@click.option("--json-input", "json_input", help="直接传入 JSON 格式的 channel_urls 列表 (会覆盖其他参数)")
+@click.option(
+    "--json-input", "json_input", help="直接传入 JSON 格式的 channel_urls 列表 (会覆盖其他参数)"
+)
 @click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
 @click.pass_context
 def create_link(
@@ -181,10 +187,20 @@ def create_link(
         if output_format == "json":
             print_json(result.model_dump(by_alias=True, exclude_none=True))
         else:
-            summary = [{"created": result.created, "duplicated": result.duplicated, "failed": result.failed, "status": result.status}]
+            summary = [
+                {
+                    "created": result.created,
+                    "duplicated": result.duplicated,
+                    "failed": result.failed,
+                    "status": result.status,
+                }
+            ]
             print_table(summary, title="Create Link Result")
             if result.channel_urls:
-                links = [link.model_dump(by_alias=True, exclude_none=True) for link in result.channel_urls]
+                links = [
+                    link.model_dump(by_alias=True, exclude_none=True)
+                    for link in result.channel_urls
+                ]
                 print_table(links, title="Created Links")
     except Exception as e:
         print_error(str(e))
