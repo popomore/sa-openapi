@@ -40,7 +40,7 @@ class Navigation(BaseModel):
 class BookmarkRelateDashboard(BaseModel):
     """Dashboard that a bookmark belongs to."""
 
-    id: str | None = None
+    id: int | str | None = None
     name: str | None = None
 
     model_config = {"populate_by_name": True}
