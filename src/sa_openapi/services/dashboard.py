@@ -70,9 +70,9 @@ class DashboardServiceV1:
         if bookmark_type is not None:
             params["type"] = bookmark_type
         if has_widget is not None:
-            params["has_widget"] = has_widget
+            params["has_widget"] = "true" if has_widget else "false"
         if has_lego is not None:
-            params["has_lego"] = has_lego
+            params["has_lego"] = "true" if has_lego else "false"
 
         response = await self._transport.get(
             f"{self._base_url}/dashboard/bookmarks",

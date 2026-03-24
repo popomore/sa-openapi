@@ -99,7 +99,7 @@ def list_groups(ctx, output_format):
 
 
 @dataset.command("sql")
-@click.option("--sql", required=True, help="SQL query")
+@click.argument("sql")
 @click.option("--description", help="Query description")
 @click.option(
     "--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table"
@@ -142,6 +142,8 @@ def model_query(ctx, dataset_id, json_str, output_format):
     """
     try:
         params = json.loads(json_str)
+        if not isinstance(params, dict):
+            raise click.BadParameter("--json must decode to a JSON object")
         params["dataset_id"] = dataset_id
         client: SensorsAnalyticsClient = ctx.obj["client"]
         result = client.dataset.model_query(params)
