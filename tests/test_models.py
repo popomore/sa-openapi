@@ -99,6 +99,7 @@ def test_measure_model():
 def test_filter_model():
     # v1 model uses 'field' instead of 'property'
     from sa_openapi.models.model import ApiRequestElementCondition
+
     cond = ApiRequestElementCondition(field="user_id", function="=", params=["123"])
     assert cond.field == "user_id"
     assert cond.function == "="
