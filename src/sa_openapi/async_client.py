@@ -9,7 +9,15 @@ from typing_extensions import Self
 from ._auth import AuthHandler
 from ._config import ClientConfig, ConfigManager
 from ._transport import AiohttpTransport
-from .services import ChannelServiceV1, DashboardServiceV1, DatasetServiceV1, ModelServiceV1
+from .services import (
+    ChannelServiceV1,
+    DashboardServiceV1,
+    DatasetServiceV1,
+    EventMetaServiceV1,
+    ModelServiceV1,
+    PropertyMetaServiceV1,
+    SmartAlarmServiceV1,
+)
 
 
 class AsyncSensorsAnalyticsClient:
@@ -50,6 +58,9 @@ class AsyncSensorsAnalyticsClient:
         self.channel = ChannelServiceV1(self._transport, self._auth)
         self.dataset = DatasetServiceV1(self._transport, self._auth)
         self.model = ModelServiceV1(self._transport, self._auth)
+        self.event_meta = EventMetaServiceV1(self._transport, self._auth)
+        self.property_meta = PropertyMetaServiceV1(self._transport, self._auth)
+        self.smart_alarm = SmartAlarmServiceV1(self._transport, self._auth)
 
     async def aclose(self) -> None:
         """Close the underlying aiohttp session."""

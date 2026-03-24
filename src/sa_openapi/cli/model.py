@@ -66,6 +66,25 @@ def _display_v1_report(report: Any, title: str) -> None:
         console.print("[yellow]Warning: Results were truncated[/yellow]")
 
 
+@model.command("segmentation-report")
+@click.option("--json", "json_str", required=True, help="Segmentation parameters as JSON")
+@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
+@click.pass_context
+def segmentation_report(ctx, json_str, output_format):
+    """Get segmentation (事件分析) report."""
+    try:
+        params = _normalize_params(json.loads(json_str))
+        client: SensorsAnalyticsClient = ctx.obj["client"]
+        report = client.model.segmentation_report(**params)
+        if output_format == "json":
+            print_json(report.model_dump(by_alias=True))
+        else:
+            _display_v1_report(report, "Segmentation Report")
+    except Exception as e:
+        print_error(str(e))
+        raise click.Abort() from e
+
+
 @model.command("funnel-report")
 @click.option("--json", "json_str", required=True, help="Funnel parameters as JSON")
 @click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
@@ -124,6 +143,101 @@ def attribution_report(ctx, json_str, output_format):
             print_json(report.model_dump(by_alias=True))
         else:
             _display_v1_report(report, "Attribution Report")
+    except Exception as e:
+        print_error(str(e))
+        raise click.Abort() from e
+
+
+@model.command("interval-report")
+@click.option("--json", "json_str", required=True, help="Interval parameters as JSON")
+@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
+@click.pass_context
+def interval_report(ctx, json_str, output_format):
+    """Get interval (间隔分析) report."""
+    try:
+        params = _normalize_params(json.loads(json_str))
+        client: SensorsAnalyticsClient = ctx.obj["client"]
+        report = client.model.interval_report(**params)
+        if output_format == "json":
+            print_json(report.model_dump(by_alias=True))
+        else:
+            _display_v1_report(report, "Interval Report")
+    except Exception as e:
+        print_error(str(e))
+        raise click.Abort() from e
+
+
+@model.command("addiction-report")
+@click.option("--json", "json_str", required=True, help="Addiction parameters as JSON")
+@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
+@click.pass_context
+def addiction_report(ctx, json_str, output_format):
+    """Get addiction (分布分析) report."""
+    try:
+        params = _normalize_params(json.loads(json_str))
+        client: SensorsAnalyticsClient = ctx.obj["client"]
+        report = client.model.addiction_report(**params)
+        if output_format == "json":
+            print_json(report.model_dump(by_alias=True))
+        else:
+            _display_v1_report(report, "Addiction Report")
+    except Exception as e:
+        print_error(str(e))
+        raise click.Abort() from e
+
+
+@model.command("user-property-report")
+@click.option("--json", "json_str", required=True, help="User property report parameters as JSON")
+@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
+@click.pass_context
+def user_property_report(ctx, json_str, output_format):
+    """Get user analytics (属性分析) report."""
+    try:
+        params = _normalize_params(json.loads(json_str))
+        client: SensorsAnalyticsClient = ctx.obj["client"]
+        report = client.model.user_property_report(**params)
+        if output_format == "json":
+            print_json(report.model_dump(by_alias=True))
+        else:
+            _display_v1_report(report, "User Property Report")
+    except Exception as e:
+        print_error(str(e))
+        raise click.Abort() from e
+
+
+@model.command("ltv-report")
+@click.option("--json", "json_str", required=True, help="LTV parameters as JSON")
+@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
+@click.pass_context
+def ltv_report(ctx, json_str, output_format):
+    """Get LTV analysis report."""
+    try:
+        params = _normalize_params(json.loads(json_str))
+        client: SensorsAnalyticsClient = ctx.obj["client"]
+        report = client.model.ltv_report(**params)
+        if output_format == "json":
+            print_json(report.model_dump(by_alias=True))
+        else:
+            _display_v1_report(report, "LTV Report")
+    except Exception as e:
+        print_error(str(e))
+        raise click.Abort() from e
+
+
+@model.command("session-report")
+@click.option("--json", "json_str", required=True, help="Session parameters as JSON")
+@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
+@click.pass_context
+def session_report(ctx, json_str, output_format):
+    """Get session analysis report."""
+    try:
+        params = _normalize_params(json.loads(json_str))
+        client: SensorsAnalyticsClient = ctx.obj["client"]
+        report = client.model.session_report(**params)
+        if output_format == "json":
+            print_json(report.model_dump(by_alias=True))
+        else:
+            _display_v1_report(report, "Session Report")
     except Exception as e:
         print_error(str(e))
         raise click.Abort() from e

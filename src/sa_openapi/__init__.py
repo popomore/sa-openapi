@@ -14,7 +14,10 @@ Usage:
     # Use services
     navigations = client.dashboard.list_navigation()
     channels = client.channel.list_channel()
-    datasets = client.dataset.list_dataset()
+    datasets = client.dataset.list_datasets()
+    events = client.event_meta.list_events_all()
+    props = client.property_meta.list_all_event_properties()
+    alarm = client.smart_alarm.get_alarm_config(1)
 
     client.close()
 
