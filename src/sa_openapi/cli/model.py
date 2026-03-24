@@ -57,7 +57,10 @@ def _display_v1_report(report: Any, title: str) -> None:
 def segmentation_report(ctx, json_str, output_format):
     """Get segmentation (事件分析) report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.segmentation_report(**params)
         if output_format == "json":
@@ -76,7 +79,10 @@ def segmentation_report(ctx, json_str, output_format):
 def funnel_report(ctx, json_str, output_format):
     """Get funnel analysis report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
 
         report = client.model.funnel_report(**params)
@@ -97,7 +103,10 @@ def funnel_report(ctx, json_str, output_format):
 def retention_report(ctx, json_str, output_format):
     """Get retention analysis report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
 
         report = client.model.retention_report(**params)
@@ -118,7 +127,10 @@ def retention_report(ctx, json_str, output_format):
 def attribution_report(ctx, json_str, output_format):
     """Get attribution analysis report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
 
         report = client.model.attribution_report(**params)
@@ -139,7 +151,10 @@ def attribution_report(ctx, json_str, output_format):
 def interval_report(ctx, json_str, output_format):
     """Get interval (间隔分析) report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.interval_report(**params)
         if output_format == "json":
@@ -158,7 +173,10 @@ def interval_report(ctx, json_str, output_format):
 def addiction_report(ctx, json_str, output_format):
     """Get addiction (分布分析) report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.addiction_report(**params)
         if output_format == "json":
@@ -177,7 +195,10 @@ def addiction_report(ctx, json_str, output_format):
 def user_property_report(ctx, json_str, output_format):
     """Get user analytics (属性分析) report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.user_property_report(**params)
         if output_format == "json":
@@ -196,7 +217,10 @@ def user_property_report(ctx, json_str, output_format):
 def ltv_report(ctx, json_str, output_format):
     """Get LTV analysis report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.ltv_report(**params)
         if output_format == "json":
@@ -215,7 +239,10 @@ def ltv_report(ctx, json_str, output_format):
 def session_report(ctx, json_str, output_format):
     """Get session analysis report."""
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.session_report(**params)
         if output_format == "json":

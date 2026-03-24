@@ -37,7 +37,7 @@ def get_dataset_detail(ctx, dataset_id, model_type, output_format):
                 "dataset_type": ds.dataset_type,
                 "sync_status": ds.sync_status,
                 "scheduler_status": ds.scheduler_status,
-                "columns_count": len(ds.columns),
+                "columns_count": len(ds.columns or []),
             }
             print_table([data], title=f"Dataset {dataset_id}")
     except Exception as e:
@@ -141,7 +141,10 @@ def model_query(ctx, dataset_id, json_str, output_format):
     Example JSON: '{"dimensions": ["city"], "measures": [{"column_name": "pv", "aggregation": "SUM"}]}'
     """
     try:
-        params = json.loads(json_str)
+        try:
+            params = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise click.BadParameter(f"--json must be valid JSON: {e}") from e
         if not isinstance(params, dict):
             raise click.BadParameter("--json must decode to a JSON object")
         params["dataset_id"] = dataset_id

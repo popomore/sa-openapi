@@ -30,7 +30,7 @@ class PropertyMetaServiceV1:
         )
         data = response.json()
         raw = data.get("data", {})
-        props = raw.get("properties", []) if isinstance(raw, dict) else []
+        props = (raw.get("properties") or []) if isinstance(raw, dict) else []
         return [PropertyDefine(**item) for item in props if isinstance(item, dict)]
 
     async def list_event_properties(self, events: list[str]) -> list[EventWithProperty]:
@@ -132,5 +132,5 @@ class PropertyMetaServiceV1:
         data = response.json()
         raw = data.get("data", {})
         if isinstance(raw, dict):
-            return list(raw.get("values", []))
+            return list(raw.get("values") or [])
         return []

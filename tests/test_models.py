@@ -1,10 +1,11 @@
 """Tests for models."""
 
 from sa_openapi.models.channel import CampaignDetail, ChannelLinkDetail
-from sa_openapi.models.dashboard import Bookmark, DashboardType, Navigation
+from sa_openapi.models.dashboard import Bookmark, BookmarkRelateDashboard, DashboardType, Navigation
 from sa_openapi.models.dataset import (
     Dataset,
     DatasetDetailResponse,
+    DatasetListRequest,
     DatasetRefreshResponse,
     DatasetSyncTaskDetailResponse,
     Schema,
@@ -13,6 +14,7 @@ from sa_openapi.models.dataset import (
 from sa_openapi.models.event_meta import EventDefine, TagInfo
 from sa_openapi.models.model import (
     AddictionReportResponse,
+    AttributionReportResponse,
     FunnelReportRequest,
     FunnelReportResponse,
     IntervalReportResponse,
@@ -22,6 +24,7 @@ from sa_openapi.models.model import (
     RetentionReportResponse,
     SegmentationReportResponse,
     SessionReportResponse,
+    SqlQueryResponse,
     UserPropertyReportResponse,
 )
 from sa_openapi.models.property_meta import (
@@ -431,3 +434,83 @@ def test_session_report_response():
     )
     assert report.metadata_columns is not None
     assert len(report.detail_rows) == 2
+
+
+# ============================================================================
+# Dashboard: BookmarkRelateDashboard
+# ============================================================================
+
+
+def test_bookmark_relate_dashboard_id_int():
+    b = BookmarkRelateDashboard(id=123, name="test")
+    assert b.id == 123
+
+
+def test_bookmark_relate_dashboard_id_str():
+    b = BookmarkRelateDashboard(id="abc", name="test")
+    assert b.id == "abc"
+
+
+# ============================================================================
+# Model service: additional response models
+# ============================================================================
+
+
+def test_funnel_report_response_with_alias():
+    r = FunnelReportResponse(metadataColumns={"date": "DATE"}, detailRows=[[1, 2]], truncated=False)
+    assert r.metadata_columns == {"date": "DATE"}
+    assert r.detail_rows == [[1, 2]]
+    assert r.truncated is False
+
+
+def test_sql_query_response_with_data():
+    r = SqlQueryResponse(data=[[1, 2], [3, 4]])
+    assert r.data == [[1, 2], [3, 4]]
+    assert r.columns is None
+
+
+def test_attribution_report_response():
+    r = AttributionReportResponse(
+        metadataColumns={"channel": "string"}, detailRows=[["organic", 500]], truncated=False
+    )
+    assert r.metadata_columns == {"channel": "string"}
+    assert r.detail_rows == [["organic", 500]]
+    assert r.truncated is False
+
+
+# ============================================================================
+# PropertyMeta: additional model tests
+# ============================================================================
+
+
+def test_property_define_minimal():
+    p = PropertyDefine(id=1, name="$city", cname="城市", data_type="string")
+    assert p.name == "$city"
+    assert p.cname == "城市"
+
+
+def test_user_group_define_minimal():
+    g = UserGroupDefine(id=1, name="VIP用户", cname="VIP", data_type="string")
+    assert g.id == 1
+
+
+# ============================================================================
+# EventMeta: additional model tests
+# ============================================================================
+
+
+def test_event_define_minimal():
+    e = EventDefine(id=1, name="$pageview", cname="页面浏览")
+    assert e.name == "$pageview"
+
+
+# ============================================================================
+# Dataset: DatasetListRequest
+# ============================================================================
+
+
+def test_dataset_list_request():
+    r = DatasetListRequest(page_index=1, page_size=20)
+    assert r.page_index == 1
+    dumped = r.model_dump(exclude_none=True)
+    assert dumped["page_index"] == 1
