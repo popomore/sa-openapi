@@ -1,27 +1,11 @@
 """Model CLI commands."""
 
 import json
-import re
 from typing import TYPE_CHECKING, Any
 
 import click
 
 from .output import console, print_error, print_json, print_table
-
-
-def _camel_to_snake(name: str) -> str:
-    s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
-    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
-
-
-def _normalize_params(value):
-    """Accept both camelCase and snake_case JSON keys recursively."""
-    if isinstance(value, dict):
-        return {_camel_to_snake(k): _normalize_params(v) for k, v in value.items()}
-    if isinstance(value, list | tuple):
-        return [_normalize_params(v) for v in value]
-    return value
-
 
 if TYPE_CHECKING:
     from ..client import SensorsAnalyticsClient
@@ -73,7 +57,7 @@ def _display_v1_report(report: Any, title: str) -> None:
 def segmentation_report(ctx, json_str, output_format):
     """Get segmentation (事件分析) report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.segmentation_report(**params)
         if output_format == "json":
@@ -92,7 +76,7 @@ def segmentation_report(ctx, json_str, output_format):
 def funnel_report(ctx, json_str, output_format):
     """Get funnel analysis report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
 
         report = client.model.funnel_report(**params)
@@ -113,7 +97,7 @@ def funnel_report(ctx, json_str, output_format):
 def retention_report(ctx, json_str, output_format):
     """Get retention analysis report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
 
         report = client.model.retention_report(**params)
@@ -134,7 +118,7 @@ def retention_report(ctx, json_str, output_format):
 def attribution_report(ctx, json_str, output_format):
     """Get attribution analysis report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
 
         report = client.model.attribution_report(**params)
@@ -155,7 +139,7 @@ def attribution_report(ctx, json_str, output_format):
 def interval_report(ctx, json_str, output_format):
     """Get interval (间隔分析) report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.interval_report(**params)
         if output_format == "json":
@@ -174,7 +158,7 @@ def interval_report(ctx, json_str, output_format):
 def addiction_report(ctx, json_str, output_format):
     """Get addiction (分布分析) report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.addiction_report(**params)
         if output_format == "json":
@@ -193,7 +177,7 @@ def addiction_report(ctx, json_str, output_format):
 def user_property_report(ctx, json_str, output_format):
     """Get user analytics (属性分析) report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.user_property_report(**params)
         if output_format == "json":
@@ -212,7 +196,7 @@ def user_property_report(ctx, json_str, output_format):
 def ltv_report(ctx, json_str, output_format):
     """Get LTV analysis report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.ltv_report(**params)
         if output_format == "json":
@@ -231,7 +215,7 @@ def ltv_report(ctx, json_str, output_format):
 def session_report(ctx, json_str, output_format):
     """Get session analysis report."""
     try:
-        params = _normalize_params(json.loads(json_str))
+        params = json.loads(json_str)
         client: SensorsAnalyticsClient = ctx.obj["client"]
         report = client.model.session_report(**params)
         if output_format == "json":
@@ -244,7 +228,7 @@ def session_report(ctx, json_str, output_format):
 
 
 @model.command("sql")
-@click.option("--sql", required=True, help="SQL query")
+@click.argument("sql")
 @click.option("--limit", type=int, default=100, help="Result limit")
 @click.option(
     "--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table"
@@ -279,7 +263,7 @@ def sql(ctx, sql, limit, output_format):
 @click.pass_context
 def explain_sql(ctx, sql):
     """Get SQL execution plan. (Not available in Model v1 API)"""
-    print_error(" is not supported by Model v1 API.")
+    print_error("Not supported by Model v1 API.")
     raise click.Abort()
 
 
@@ -288,5 +272,5 @@ def explain_sql(ctx, sql):
 @click.pass_context
 def validate_sql(ctx, sql):
     """Validate SQL syntax. (Not available in Model v1 API)"""
-    print_error(" is not supported by Model v1 API.")
+    print_error("Not supported by Model v1 API.")
     raise click.Abort()
