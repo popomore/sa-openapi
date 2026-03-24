@@ -6,6 +6,9 @@ from .._auth import AuthHandler
 from .._transport import AiohttpTransport
 from ..models.channel import (
     Channel,
+    ChannelUrlData,
+    CreatedLinkItem,
+    CreateLinkResult,
     Link,
     LinkData,
     LinkDataParams,
@@ -85,6 +88,44 @@ class ChannelServiceV1:
         )
         data = response.json()
         return LinkData(**data.get("data", {}))
+
+    async def create_link(
+        self,
+        channel_urls: list[ChannelUrlData | dict[str, Any]],
+    ) -> CreateLinkResult:
+        """Create one or more channel tracking links.
+
+        Args:
+            channel_urls: List of channel link definitions to create
+
+        Returns:
+            CreateLinkResult with created/duplicated/failed counts and link details
+        """
+        items = [
+            item if isinstance(item, ChannelUrlData) else ChannelUrlData(**item)
+            for item in channel_urls
+        ]
+        payload = {
+            "channel_urls": [item.model_dump(by_alias=True, exclude_none=True) for item in items]
+        }
+        response = await self._transport.post(
+            f"{self._base_url}/channel/links/create",
+            json=payload,
+        )
+        data = response.json()
+        raw = data.get("data", {})
+        # channel_urls may be a list or a nested object with its own channel_urls list
+        raw_urls = raw.get("channel_urls", [])
+        if isinstance(raw_urls, dict):
+            raw_urls = raw_urls.get("channel_urls", [])
+        link_items = [CreatedLinkItem(**item) for item in raw_urls]
+        return CreateLinkResult(
+            created=raw.get("created"),
+            duplicated=raw.get("duplicated"),
+            failed=raw.get("failed"),
+            status=raw.get("status"),
+            channel_urls=link_items,
+        )
 
     async def export_link(
         self,
