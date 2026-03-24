@@ -7,29 +7,39 @@
 
 ## 特性
 
-- 🚀 **完整的 API 覆盖**：支持 Dashboard、Channel、Dataset、Model 四大服务，共 24 个 API 端点
+- 🚀 **完整的 API 覆盖**：支持 Dashboard、Channel、Dataset、EventMeta、PropertyMeta、Model、SmartAlarm 七大服务，共 38 个 API 端点
 - 🔒 **类型安全**：基于 Pydantic v2 的完整类型提示和运行时验证
 - ⚡ **同步/异步支持**：同时提供同步和异步客户端
 - 🛠️ **强大的 CLI**：命令行工具支持表格、JSON、CSV 多种输出格式
-- 📦 **现代化设计**：基于 httpx 和 Pydantic v2 构建
-- 🧪 **高测试覆盖率**：90%+ 的测试覆盖率
+- 📦 **现代化设计**：基于 aiohttp 和 Pydantic v2 构建
+- 🧪 **高测试覆盖率**：完整的模型测试覆盖
 
 ## 安装
 
+### 作为 CLI 工具安装（推荐）
+
+使用 [uv](https://docs.astral.sh/uv/) 全局安装（推荐）：
+
+```bash
+uv tool install sa-openapi
+```
+
+安装后可直接使用 `sa-openapi` 命令。
+
+### 作为 Python 包安装
+
 ```bash
 pip install sa-openapi
+# 或
+uv add sa-openapi
 ```
 
-支持异步功能（可选）：
+### 开发环境安装
 
 ```bash
-pip install sa-openapi[async]
-```
-
-开发环境安装：
-
-```bash
-pip install sa-openapi[dev]
+git clone https://github.com/popomore/sa-openapi.git
+cd sa-openapi
+uv sync
 ```
 
 ## 快速开始
@@ -194,24 +204,53 @@ export SA_PROJECT="default"
 
 | 方法 | 描述 |
 |------|------|
-| `list_dataset()` | 获取数据集列表 |
-| `get_dataset(dataset_id)` | 获取指定数据集 |
-| `sql_query(dataset_id, sql, limit)` | 执行 SQL 查询 |
-| `get_schema(dataset_id)` | 获取数据集 schema |
-| `list_saved_query(dataset_id)` | 获取保存的查询列表 |
-| `create_saved_query(...)` | 创建保存的查询 |
-| `delete_saved_query(query_id)` | 删除保存的查询 |
+| `get_dataset_detail(dataset_id)` | 获取数据集详情 |
+| `list_datasets(params)` | 获取数据集列表 |
+| `list_dataset_groups()` | 获取数据集分组列表 |
+| `sql_query(sql, query_parameters)` | 执行 SQL 查询 |
+| `model_query(params)` | 模型查询（维度/度量） |
+| `refresh_dataset(dataset_id)` | 触发数据集刷新 |
+| `get_sync_task_detail(sync_task_id)` | 查询同步任务状态 |
+
+### EventMeta 服务
+
+| 方法 | 描述 |
+|------|------|
+| `list_events_all()` | 获取所有事件定义 |
+| `list_event_tags()` | 获取事件标签列表 |
+
+### PropertyMeta 服务
+
+| 方法 | 描述 |
+|------|------|
+| `list_all_event_properties()` | 获取所有事件属性 |
+| `list_event_properties(events)` | 获取指定事件的属性 |
+| `list_all_user_properties()` | 获取所有用户属性 |
+| `list_user_groups()` | 获取用户分群列表 |
+| `list_user_tags_with_dir()` | 获取用户标签树 |
+| `get_property_values(table_type, property_name)` | 获取属性候选值 |
+
+### SmartAlarm 服务
+
+| 方法 | 描述 |
+|------|------|
+| `get_alarm_config(config_id)` | 获取报警配置详情 |
+| `list_alarms(params)` | 查询报警列表 |
 
 ### Model 服务
 
 | 方法 | 描述 |
 |------|------|
-| `funnel_report(measures, filter, by_fields)` | 漏斗分析报告 |
-| `retention_report(measures, filter, by_fields)` | 留存分析报告 |
-| `attribution_report(measures, filter, by_fields)` | 归因分析报告 |
+| `segmentation_report(**params)` | 用户分群分析报告 |
+| `funnel_report(**params)` | 漏斗分析报告 |
+| `retention_report(**params)` | 留存分析报告 |
+| `interval_report(**params)` | 间隔分析报告 |
+| `addiction_report(**params)` | 黏性分析报告 |
+| `user_property_report(**params)` | 用户属性分析报告 |
+| `attribution_report(**params)` | 归因分析报告 |
+| `ltv_report(**params)` | LTV 分析报告 |
+| `session_report(**params)` | Session 分析报告 |
 | `sql_query(sql, limit)` | 自定义 SQL 查询 |
-| `explain_sql(sql)` | SQL 执行计划 |
-| `validate_sql(sql)` | SQL 语法验证 |
 
 ## 架构设计
 
@@ -263,40 +302,26 @@ for item in client.dataset.list_dataset_iter():
 git clone https://github.com/popomore/sa-openapi.git
 cd sa-openapi
 
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
+# 安装开发依赖（推荐使用 uv）
+uv sync
 
-# 安装开发依赖
+# 或使用 pip
 pip install -e ".[dev]"
 ```
 
 ### 运行测试
 
 ```bash
-# 运行所有测试
-pytest
-
-# 运行带覆盖率报告
-pytest --cov=sa_openapi --cov-report=html
-
-# 运行特定测试
-pytest tests/test_dashboard.py
+uv run pytest
+# 带覆盖率报告
+uv run pytest --cov=sa_openapi --cov-report=html
 ```
 
 ### 代码质量检查
 
 ```bash
-# 格式检查和自动修复
-ruff check src/ --fix
-ruff format src/
-
-# 类型检查
-mypy src/
-
-# 全部检查
-ruff check src/ && mypy src/ && pytest
+# 全部检查（提交前运行）
+uv run ruff check src/ tests/ && uv run ruff format --check src/ tests/ && uv run mypy src/ tests/ && uv run pytest
 ```
 
 ### 项目结构
@@ -321,11 +346,17 @@ sa-openapi/
 │   │   ├── dashboard.py
 │   │   ├── channel.py
 │   │   ├── dataset.py
+│   │   ├── event_meta.py
+│   │   ├── property_meta.py
+│   │   ├── smart_alarm.py
 │   │   └── model.py
 │   ├── services/                  # API 服务实现
 │   │   ├── dashboard.py
 │   │   ├── channel.py
 │   │   ├── dataset.py
+│   │   ├── event_meta.py
+│   │   ├── property_meta.py
+│   │   ├── smart_alarm.py
 │   │   └── model.py
 │   └── cli/                       # CLI 工具
 │       ├── main.py
@@ -334,6 +365,9 @@ sa-openapi/
 │       ├── dashboard.py
 │       ├── channel.py
 │       ├── dataset.py
+│       ├── event_meta.py
+│       ├── property_meta.py
+│       ├── smart_alarm.py
 │       └── model.py
 ├── tests/                         # 测试文件
 ├── pyproject.toml                 # 项目配置

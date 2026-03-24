@@ -15,7 +15,7 @@ def config():
 @config.command("init")
 @click.option("--base-url", prompt=True, help="Sensors Analytics base URL")
 @click.option("--api-key", prompt=True, hide_input=True, help="API key")
-@click.option("--project", default="default", help="Project name")
+@click.option("--project", prompt=True, default="default", help="Project name")
 def init(base_url, api_key, project):
     """Initialize configuration interactively."""
     manager = ConfigManager()

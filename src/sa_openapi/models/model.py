@@ -182,7 +182,56 @@ class AttributionReportResponse(BaseModel):
 
 class SqlQueryResponse(BaseModel):
     columns: list[str] | None = None
-    data: list[dict[str, Any]] | None = None
+    data: list[list[Any]] | None = None
+
+    model_config = {"populate_by_name": True}
+
+
+class SegmentationReportResponse(BaseModel):
+    truncated: bool | None = None
+    metadata_columns: dict[str, Any] | None = Field(None, alias="metadataColumns")
+    detail_rows: list[list[Any]] | None = Field(None, alias="detailRows")
+
+    model_config = {"populate_by_name": True}
+
+
+class IntervalReportResponse(BaseModel):
+    truncated: bool | None = None
+    metadata_columns: dict[str, Any] | None = Field(None, alias="metadataColumns")
+    detail_rows: list[list[Any]] | None = Field(None, alias="detailRows")
+
+    model_config = {"populate_by_name": True}
+
+
+class AddictionReportResponse(BaseModel):
+    truncated: bool | None = None
+    by_field: str | None = Field(None, alias="byField")
+    metadata_columns: dict[str, Any] | None = Field(None, alias="metadataColumns")
+    detail_rows: list[list[Any]] | None = Field(None, alias="detailRows")
+
+    model_config = {"populate_by_name": True}
+
+
+class UserPropertyReportResponse(BaseModel):
+    truncated: bool | None = None
+    metadata_columns: dict[str, Any] | None = Field(None, alias="metadataColumns")
+    detail_rows: list[list[Any]] | None = Field(None, alias="detailRows")
+
+    model_config = {"populate_by_name": True}
+
+
+class LtvReportResponse(BaseModel):
+    truncated: bool | None = None
+    metadata_columns: dict[str, Any] | None = Field(None, alias="metadataColumns")
+    detail_rows: list[list[Any]] | None = Field(None, alias="detailRows")
+
+    model_config = {"populate_by_name": True}
+
+
+class SessionReportResponse(BaseModel):
+    truncated: bool | None = None
+    metadata_columns: dict[str, Any] | None = Field(None, alias="metadataColumns")
+    detail_rows: list[list[Any]] | None = Field(None, alias="detailRows")
 
     model_config = {"populate_by_name": True}
 

@@ -1,6 +1,11 @@
 """Data models for sa-openapi."""
 
-from .channel import Channel, Link, LinkData, LinkDataParams, LinkExportParams
+from .channel import (
+    CampaignDetail,
+    CampaignListResponse,
+    ChannelLinkDetail,
+    ChannelLinkListResponse,
+)
 from .common import (
     BookmarkData,
     ErrorInfo,
@@ -8,7 +13,7 @@ from .common import (
     Pagination,
     QueryResult,
 )
-from .dashboard import BookmarkDataParams, BookmarkExportParams, Navigation
+from .dashboard import Bookmark, Navigation
 from .dataset import CreateSavedQueryParams, Dataset, SavedQuery
 from .model import (
     ApiFunnelDefine,
@@ -34,7 +39,6 @@ from .model import (
 )
 
 __all__ = [
-    # model (v1 aligned)
     "ApiFunnelDefine",
     "ApiRequestElementCondition",
     "ApiRequestEventWithFilter",
@@ -43,29 +47,20 @@ __all__ = [
     "AttributionReport",
     "AttributionReportRequest",
     "AttributionReportResponse",
-    # common
+    "Bookmark",
     "BookmarkData",
-    # dashboard
-    "BookmarkDataParams",
-    "BookmarkExportParams",
-    "ByField",
-    # channel
-    "Channel",
-    # dataset
+    "CampaignDetail",
+    "CampaignListResponse",
+    "ChannelLinkDetail",
+    "ChannelLinkListResponse",
     "CreateSavedQueryParams",
     "Dataset",
     "ErrorInfo",
-    # backward compatibility
-    "Filter",
     "FunnelReport",
     "FunnelReportRequest",
     "FunnelReportResponse",
     "HttpApiResult",
-    "Link",
-    "LinkData",
-    "LinkDataParams",
     "LinkEvent",
-    "LinkExportParams",
     "Measure",
     "Navigation",
     "Pagination",

@@ -37,46 +37,24 @@ class Navigation(BaseModel):
         return self.name or self.title or str(self.id)
 
 
+class BookmarkRelateDashboard(BaseModel):
+    """Dashboard that a bookmark belongs to."""
+
+    id: int | str | None = None
+    name: str | None = None
+
+    model_config = {"populate_by_name": True}
+
+
 class Bookmark(BaseModel):
-    """Dashboard bookmark model."""
+    """Dashboard bookmark model (from GET /dashboard/bookmarks)."""
 
-    id: int
-    name: str
-    navigation_id: int = Field(alias="navigationId")
-    owner_id: int = Field(alias="ownerId")
-    description: str | None = None
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime | None = Field(None, alias="updatedAt")
-
-    model_config = {"populate_by_name": True}
-
-
-class BookmarkDataParams(BaseModel):
-    """Parameters for getting bookmark data."""
-
-    start_date: str = Field(alias="startDate")
-    end_date: str = Field(alias="endDate")
-    filters: list[dict] | None = None
-    time_zone: str | None = Field("Asia/Shanghai", alias="timeZone")
-
-    model_config = {"populate_by_name": True}
-
-
-class BookmarkData(BaseModel):
-    """Bookmark data response."""
-
-    columns: list[str]
-    rows: list[list]
-    total: int | None = None
-
-
-class BookmarkExportParams(BaseModel):
-    """Parameters for exporting bookmark."""
-
-    start_date: str = Field(alias="startDate")
-    end_date: str = Field(alias="endDate")
-    filters: list[dict] | None = None
-    format: str = "csv"
-    time_zone: str | None = Field("Asia/Shanghai", alias="timeZone")
+    id: int | None = None
+    user_id: int | None = None
+    type: str | None = None
+    name: str | None = None
+    user_cname: str | None = None
+    create_time: str | None = None
+    dashboards: list[BookmarkRelateDashboard] = Field(default_factory=list)
 
     model_config = {"populate_by_name": True}

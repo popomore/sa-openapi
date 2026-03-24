@@ -1,15 +1,10 @@
 """Dashboard service implementation."""
 
-from typing import Any
-
 from .._auth import AuthHandler
 from .._log import get_logger
 from .._transport import AiohttpTransport
-from ..models.common import BookmarkData
 from ..models.dashboard import (
     Bookmark,
-    BookmarkDataParams,
-    BookmarkExportParams,
     Navigation,
 )
 
@@ -55,95 +50,35 @@ class DashboardServiceV1:
             logger.debug("list_navigation first item: %r", raw_items[0])
         return [Navigation(**item) for item in raw_items if isinstance(item, dict)]
 
-    async def get_navigation(self, navigation_id: int) -> Navigation:
-        """Get specific navigation.
+    async def list_bookmarks(
+        self,
+        bookmark_type: str | None = None,
+        has_widget: bool | None = None,
+        has_lego: bool | None = None,
+    ) -> list[Bookmark]:
+        """Get all bookmarks.
 
         Args:
-            navigation_id: Navigation ID
-
-        Returns:
-            Navigation details
-        """
-        response = await self._transport.get(
-            f"{self._base_url}/dashboard/navigation/{navigation_id}",
-        )
-        data = response.json()
-        return Navigation(**data.get("data", {}))
-
-    async def list_bookmark(self, navigation_id: int) -> list[Bookmark]:
-        """Get bookmark list for a navigation.
-
-        Args:
-            navigation_id: Navigation ID
+            bookmark_type: Filter by bookmark type
+            has_widget: Filter by has_widget flag
+            has_lego: Filter by has_lego flag
 
         Returns:
             List of bookmarks
         """
+        params: dict = {}
+        if bookmark_type is not None:
+            params["type"] = bookmark_type
+        if has_widget is not None:
+            params["has_widget"] = "true" if has_widget else "false"
+        if has_lego is not None:
+            params["has_lego"] = "true" if has_lego else "false"
+
         response = await self._transport.get(
-            f"{self._base_url}/dashboard/bookmark",
-            params={"navigation_id": navigation_id},
+            f"{self._base_url}/dashboard/bookmarks",
+            params=params or None,
         )
         data = response.json()
-        return [Bookmark(**item) for item in data.get("data", [])]
-
-    async def get_bookmark(self, bookmark_id: int) -> Bookmark:
-        """Get specific bookmark.
-
-        Args:
-            bookmark_id: Bookmark ID
-
-        Returns:
-            Bookmark details
-        """
-        response = await self._transport.get(
-            f"{self._base_url}/dashboard/bookmark/{bookmark_id}",
-        )
-        data = response.json()
-        return Bookmark(**data.get("data", {}))
-
-    async def get_bookmark_data(
-        self,
-        bookmark_id: int,
-        params: BookmarkDataParams | dict[str, Any],
-    ) -> BookmarkData:
-        """Get bookmark data.
-
-        Args:
-            bookmark_id: Bookmark ID
-            params: Query parameters
-
-        Returns:
-            Bookmark data
-        """
-        if isinstance(params, dict):
-            params = BookmarkDataParams(**params)
-
-        response = await self._transport.post(
-            f"{self._base_url}/dashboard/bookmark/{bookmark_id}/data",
-            json=params.model_dump(by_alias=True, exclude_none=True),
-        )
-        data = response.json()
-        return BookmarkData(**data.get("data", {}))
-
-    async def export_bookmark(
-        self,
-        bookmark_id: int,
-        params: BookmarkExportParams | dict[str, Any],
-    ) -> bytes:
-        """Export bookmark data.
-
-        Args:
-            bookmark_id: Bookmark ID
-            params: Export parameters
-
-        Returns:
-            Export file content (bytes)
-        """
-        if isinstance(params, dict):
-            params = BookmarkExportParams(**params)
-
-        response = await self._transport.post(
-            f"{self._base_url}/dashboard/bookmark/{bookmark_id}/export",
-            json=params.model_dump(by_alias=True, exclude_none=True),
-        )
-        return response.content
+        raw = data.get("data", {})
+        items = raw.get("bookmarks", []) if isinstance(raw, dict) else []
+        return [Bookmark(**item) for item in items if isinstance(item, dict)]
