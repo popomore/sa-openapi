@@ -1,5 +1,6 @@
 """Model service implementation - OpenAPI v1 aligned."""
 
+import json as json_module
 from typing import Any
 
 from .._auth import AuthHandler
@@ -66,7 +67,11 @@ class ModelServiceV1:
         sql: str,
         limit: str | None = None,
     ) -> SqlQueryResponse:
-        """Execute custom SQL query (v1)."""
+        """Execute custom SQL query (v1).
+
+        The API returns NDJSON (one JSON object per line), each line containing
+        one row's values in data.data. There is no column metadata in the response.
+        """
         params: dict[str, Any] = {"sql": sql}
         if limit is not None:
             params["limit"] = str(limit)
@@ -75,9 +80,22 @@ class ModelServiceV1:
             f"{self._base_url}/model/sql/query",
             json=params,
         )
-        data = response.json()
-        payload = data.get("data", {})
-        return SqlQueryResponse(**payload)
+
+        # Parse NDJSON: each line is {"code":"SUCCESS","data":{"data":[...row values...]}}
+        rows: list[list[Any]] = []
+        for line in response.content.decode().strip().split("\n"):
+            if not line.strip():
+                continue
+            try:
+                obj = json_module.loads(line)
+                if isinstance(obj, dict) and obj.get("code") == "SUCCESS":
+                    row_data = obj.get("data", {})
+                    if isinstance(row_data, dict) and "data" in row_data:
+                        rows.append(row_data["data"])
+            except (ValueError, KeyError):
+                continue
+
+        return SqlQueryResponse(data=rows if rows else None)
 
     async def segmentation_report(self, **kwargs: Any) -> SegmentationReportResponse:
         """Get segmentation (事件分析) report.

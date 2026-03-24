@@ -240,8 +240,10 @@ def sql(ctx, sql, limit, output_format):
         client: SensorsAnalyticsClient = ctx.obj["client"]
         result = client.model.sql_query(sql, limit=limit)
 
-        columns = result.columns or []
         data = result.data or []
+        # API does not return column names; generate col_0, col_1, ... from first row
+        first_row = data[0] if data else []
+        columns = result.columns or [f"col_{i}" for i in range(len(first_row))]
 
         if output_format == "json":
             print_json(result.model_dump(by_alias=True))
