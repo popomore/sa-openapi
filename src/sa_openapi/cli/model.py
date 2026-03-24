@@ -18,7 +18,7 @@ def _normalize_params(value):
     """Accept both camelCase and snake_case JSON keys recursively."""
     if isinstance(value, dict):
         return {_camel_to_snake(k): _normalize_params(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list | tuple):
         return [_normalize_params(v) for v in value]
     return value
 
@@ -52,7 +52,7 @@ def _display_v1_report(report: Any, title: str) -> None:
     # Build table rows
     table_rows = []
     for row in detail_rows:
-        if isinstance(row, (list, tuple)):
+        if isinstance(row, list | tuple):
             table_rows.append(dict(zip(columns, row, strict=False)))
         else:
             table_rows.append(row)
