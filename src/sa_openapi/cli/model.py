@@ -36,9 +36,9 @@ def model():
 def _display_v1_report(report: Any, title: str) -> None:
     """Display v1 report with metadata_columns and detail_rows."""
     # Get metadata columns and detail rows
-    metadata = getattr(report, 'metadata_columns', None) or {}
-    detail_rows = getattr(report, 'detail_rows', None) or []
-    truncated = getattr(report, 'truncated', False)
+    metadata = getattr(report, "metadata_columns", None) or {}
+    detail_rows = getattr(report, "detail_rows", None) or []
+    truncated = getattr(report, "truncated", False)
 
     # Convert metadata_columns dict to column names
     columns = list(metadata.keys()) if metadata else []
@@ -149,6 +149,7 @@ def sql(ctx, sql, limit, output_format):
             print_json(result.model_dump(by_alias=True))
         elif output_format == "csv":
             from .output import print_csv
+
             rows = [dict(zip(columns, row, strict=False)) for row in data]
             print_csv(rows)
         else:
