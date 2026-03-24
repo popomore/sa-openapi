@@ -5,14 +5,11 @@ from typing import Any
 from .._auth import AuthHandler
 from .._transport import AiohttpTransport
 from ..models.channel import (
-    Channel,
+    CampaignListResponse,
+    ChannelLinkListResponse,
     ChannelUrlData,
-    CreatedLinkItem,
     CreateLinkResult,
-    Link,
-    LinkData,
-    LinkDataParams,
-    LinkExportParams,
+    CreatedLinkItem,
 )
 
 
@@ -24,70 +21,47 @@ class ChannelServiceV1:
         self._auth = auth
         self._base_url = transport.config.dashboard_v1_base_url
 
-    async def list_channel(self) -> list[Channel]:
-        """Get channel list.
-
-        Returns:
-            List of channels
-        """
-        response = await self._transport.get(f"{self._base_url}/channel")
-        data = response.json()
-        return [Channel(**item) for item in data.get("data", [])]
-
-    async def list_link(self, channel_id: int) -> list[Link]:
-        """Get link list for a channel.
-
-        Args:
-            channel_id: Channel ID
-
-        Returns:
-            List of links
-        """
-        response = await self._transport.get(
-            f"{self._base_url}/channel/link",
-            params={"channel_id": channel_id},
-        )
-        data = response.json()
-        return [Link(**item) for item in data.get("data", [])]
-
-    async def get_link(self, link_id: int) -> Link:
-        """Get specific link.
-
-        Args:
-            link_id: Link ID
-
-        Returns:
-            Link details
-        """
-        response = await self._transport.get(
-            f"{self._base_url}/channel/link/{link_id}",
-        )
-        data = response.json()
-        return Link(**data.get("data", {}))
-
-    async def get_link_data(
+    async def list_campaigns(
         self,
-        link_id: int,
-        params: LinkDataParams | dict[str, Any],
-    ) -> LinkData:
-        """Get link data.
+        page_num: int = 1,
+        page_size: int = 20,
+    ) -> CampaignListResponse:
+        """Get campaign list.
 
         Args:
-            link_id: Link ID
-            params: Query parameters
+            page_num: Page number (1-based)
+            page_size: Page size
 
         Returns:
-            Link data
+            Campaign list response
         """
-        if isinstance(params, dict):
-            params = LinkDataParams(**params)
-
         response = await self._transport.post(
-            f"{self._base_url}/channel/link/{link_id}/data",
-            json=params.model_dump(by_alias=True, exclude_none=True),
+            f"{self._base_url}/channel/campaigns/list",
+            json={"page_num": page_num, "page_size": page_size},
         )
         data = response.json()
-        return LinkData(**data.get("data", {}))
+        return CampaignListResponse(**data.get("data", {}))
+
+    async def list_links(
+        self,
+        page_num: int = 1,
+        page_size: int = 20,
+    ) -> ChannelLinkListResponse:
+        """Get channel link list.
+
+        Args:
+            page_num: Page number (1-based)
+            page_size: Page size
+
+        Returns:
+            Channel link list response
+        """
+        response = await self._transport.post(
+            f"{self._base_url}/channel/links/list",
+            json={"page_num": page_num, "page_size": page_size},
+        )
+        data = response.json()
+        return ChannelLinkListResponse(**data.get("data", {}))
 
     async def create_link(
         self,
@@ -114,7 +88,6 @@ class ChannelServiceV1:
         )
         data = response.json()
         raw = data.get("data", {})
-        # channel_urls may be a list or a nested object with its own channel_urls list
         raw_urls = raw.get("channel_urls", [])
         if isinstance(raw_urls, dict):
             raw_urls = raw_urls.get("channel_urls", [])
@@ -126,26 +99,3 @@ class ChannelServiceV1:
             status=raw.get("status"),
             channel_urls=link_items,
         )
-
-    async def export_link(
-        self,
-        link_id: int,
-        params: LinkExportParams | dict[str, Any],
-    ) -> bytes:
-        """Export link data.
-
-        Args:
-            link_id: Link ID
-            params: Export parameters
-
-        Returns:
-            Export file content (bytes)
-        """
-        if isinstance(params, dict):
-            params = LinkExportParams(**params)
-
-        response = await self._transport.post(
-            f"{self._base_url}/channel/link/{link_id}/export",
-            json=params.model_dump(by_alias=True, exclude_none=True),
-        )
-        return response.content

@@ -17,97 +17,52 @@ def channel():
     pass
 
 
-@channel.command("list")
+@channel.command("campaigns")
+@click.option("--page", default=1, type=int, help="Page number")
+@click.option("--page-size", default=20, type=int, help="Page size")
 @click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
 @click.pass_context
-def list_channels(ctx, output_format):
-    """List all channels."""
+def list_campaigns(ctx, page, page_size, output_format):
+    """List all campaigns."""
     try:
         client: SensorsAnalyticsClient = ctx.obj["client"]
-        channels = client.channel.list_channel()
-
-        data = [c.model_dump(by_alias=True) for c in channels]
+        result = client.channel.list_campaigns(page_num=page, page_size=page_size)
 
         if output_format == "json":
-            print_json(data)
+            print_json(result.model_dump(by_alias=True))
         else:
-            print_table(data, title="Channels")
+            data = [c.model_dump(by_alias=True) for c in result.campaign_details]
+            print_table(data, title=f"Campaigns (total: {result.total_rows})")
     except Exception as e:
         print_error(str(e))
         raise click.Abort() from e
 
 
-@channel.command("list-links")
-@click.option("--channel-id", required=True, type=int, help="Channel ID")
+@channel.command("links")
+@click.option("--page", default=1, type=int, help="Page number")
+@click.option("--page-size", default=20, type=int, help="Page size")
 @click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
 @click.pass_context
-def list_links(ctx, channel_id, output_format):
-    """List links for a channel."""
+def list_links(ctx, page, page_size, output_format):
+    """List all channel links."""
     try:
         client: SensorsAnalyticsClient = ctx.obj["client"]
-        links = client.channel.list_link(channel_id=channel_id)
-
-        data = [link.model_dump(by_alias=True) for link in links]
+        result = client.channel.list_links(page_num=page, page_size=page_size)
 
         if output_format == "json":
-            print_json(data)
+            print_json(result.model_dump(by_alias=True))
         else:
-            print_table(data, title=f"Links (Channel {channel_id})")
-    except Exception as e:
-        print_error(str(e))
-        raise click.Abort() from e
-
-
-@channel.command("get-link")
-@click.argument("link_id", type=int)
-@click.option("--format", "output_format", type=click.Choice(["table", "json"]), default="table")
-@click.pass_context
-def get_link(ctx, link_id, output_format):
-    """Get link details."""
-    try:
-        client: SensorsAnalyticsClient = ctx.obj["client"]
-        link = client.channel.get_link(link_id)
-
-        data = link.model_dump(by_alias=True)
-
-        if output_format == "json":
-            print_json(data)
-        else:
-            print_table([data], title=f"Link {link_id}")
-    except Exception as e:
-        print_error(str(e))
-        raise click.Abort() from e
-
-
-@channel.command("link-data")
-@click.argument("link_id", type=int)
-@click.option("--start-date", required=True, help="Start date (YYYY-MM-DD)")
-@click.option("--end-date", required=True, help="End date (YYYY-MM-DD)")
-@click.option(
-    "--format", "output_format", type=click.Choice(["table", "json", "csv"]), default="table"
-)
-@click.pass_context
-def get_link_data(ctx, link_id, start_date, end_date, output_format):
-    """Get link data."""
-    try:
-        client: SensorsAnalyticsClient = ctx.obj["client"]
-        data = client.channel.get_link_data(
-            link_id,
-            {"startDate": start_date, "endDate": end_date},
-        )
-
-        rows = []
-        for row in data.rows:
-            rows.append(dict(zip(data.columns, row, strict=False)))
-
-        if output_format == "json":
-            print_json(rows)
-        elif output_format == "csv":
-            from .output import print_csv
-
-            print_csv(rows)
-        else:
-            print_table(rows, title=f"Link {link_id} Data")
+            data = [
+                {
+                    "id": lk.id,
+                    "name": lk.name,
+                    "channel_type": lk.channel_type,
+                    "device_type": lk.device_type,
+                    "short_url": lk.short_url,
+                }
+                for lk in result.detail_results
+            ]
+            print_table(data, title=f"Channel Links (total: {result.total_rows})")
     except Exception as e:
         print_error(str(e))
         raise click.Abort() from e

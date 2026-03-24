@@ -1,6 +1,6 @@
 """Tests for models."""
 
-from sa_openapi.models.channel import Channel, Link
+from sa_openapi.models.channel import CampaignDetail, ChannelLinkDetail
 from sa_openapi.models.dashboard import Bookmark, DashboardType, Navigation
 from sa_openapi.models.dataset import (
     Dataset,
@@ -60,36 +60,35 @@ def test_bookmark_model():
     bookmark = Bookmark(
         id=1,
         name="Test Bookmark",
-        navigationId=1,
-        ownerId=100,
-        createdAt="2024-01-01T00:00:00",
+        type="CHART",
+        user_id=100,
+        create_time="2024-01-01T00:00:00",
     )
     assert bookmark.id == 1
     assert bookmark.name == "Test Bookmark"
-    assert bookmark.navigation_id == 1
+    assert bookmark.user_id == 100
 
 
-def test_channel_model():
-    channel = Channel(
-        id=1,
-        name="Test Channel",
-        createdAt="2024-01-01T00:00:00",
+def test_campaign_detail_model():
+    campaign = CampaignDetail(
+        campaign_name="春节活动",
+        branch_num=5,
+        latest_use_time="2024-01-01T00:00:00",
     )
-    assert channel.id == 1
-    assert channel.name == "Test Channel"
+    assert campaign.campaign_name == "春节活动"
+    assert campaign.branch_num == 5
 
 
-def test_link_model():
-    link = Link(
+def test_channel_link_detail_model():
+    link = ChannelLinkDetail(
         id=1,
-        name="Test Link",
-        channelId=1,
-        url="https://example.com",
-        createdBy=100,
-        createdAt="2024-01-01T00:00:00",
+        name="APP通用渠道",
+        channel_type="APP",
+        device_type="iOS",
+        short_url="https://short.url/abc",
     )
     assert link.id == 1
-    assert link.url == "https://example.com"
+    assert link.channel_type == "APP"
 
 
 def test_dataset_model():
