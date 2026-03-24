@@ -8,8 +8,8 @@ from ..models.channel import (
     CampaignListResponse,
     ChannelLinkListResponse,
     ChannelUrlData,
-    CreateLinkResult,
     CreatedLinkItem,
+    CreateLinkResult,
 )
 
 

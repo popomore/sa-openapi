@@ -38,5 +38,7 @@ class EventMetaServiceV1:
         )
         data = response.json()
         raw = data.get("data", {})
-        tag_infos = raw.get("tagInfos", raw.get("tag_infos", [])) if isinstance(raw, dict) else []
+        tag_infos = (
+            (raw.get("tagInfos") or raw.get("tag_infos") or []) if isinstance(raw, dict) else []
+        )
         return [TagInfo(**item) for item in tag_infos if isinstance(item, dict)]

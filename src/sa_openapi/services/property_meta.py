@@ -50,7 +50,7 @@ class PropertyMetaServiceV1:
         data = response.json()
         raw = data.get("data", {})
         event_props = (
-            raw.get("eventProperties", raw.get("event_properties", []))
+            (raw.get("eventProperties") or raw.get("event_properties") or [])
             if isinstance(raw, dict)
             else []
         )
@@ -68,7 +68,7 @@ class PropertyMetaServiceV1:
         data = response.json()
         raw = data.get("data", {})
         props = (
-            raw.get("userProperties", raw.get("user_properties", []))
+            (raw.get("userProperties") or raw.get("user_properties") or [])
             if isinstance(raw, dict)
             else []
         )
@@ -85,7 +85,9 @@ class PropertyMetaServiceV1:
         )
         data = response.json()
         raw = data.get("data", {})
-        groups = raw.get("userGroups", raw.get("user_groups", [])) if isinstance(raw, dict) else []
+        groups = (
+            (raw.get("userGroups") or raw.get("user_groups") or []) if isinstance(raw, dict) else []
+        )
         return [UserGroupDefine(**item) for item in groups if isinstance(item, dict)]
 
     async def list_user_tags_with_dir(self) -> list[UserTagDirDefine]:
@@ -99,7 +101,7 @@ class PropertyMetaServiceV1:
         )
         data = response.json()
         raw = data.get("data", {})
-        tags = raw.get("userTags", raw.get("user_tags", [])) if isinstance(raw, dict) else []
+        tags = (raw.get("userTags") or raw.get("user_tags") or []) if isinstance(raw, dict) else []
         return [UserTagDirDefine(**item) for item in tags if isinstance(item, dict)]
 
     async def get_property_values(
@@ -119,8 +121,8 @@ class PropertyMetaServiceV1:
             List of property values
         """
         req = GetPropertyValueRequest(
-            table_type=table_type,
-            property_name=property_name,
+            tableType=table_type,
+            propertyName=property_name,
             limit=limit,
         )
         response = await self._transport.post(
@@ -130,5 +132,5 @@ class PropertyMetaServiceV1:
         data = response.json()
         raw = data.get("data", {})
         if isinstance(raw, dict):
-            return raw.get("values", [])
+            return list(raw.get("values", []))
         return []

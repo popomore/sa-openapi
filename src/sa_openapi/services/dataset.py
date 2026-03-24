@@ -92,7 +92,9 @@ class DatasetServiceV1:
         data = response.json()
         raw = data.get("data", {})
         groups = (
-            raw.get("datasetGroups", raw.get("dataset_groups", [])) if isinstance(raw, dict) else []
+            (raw.get("datasetGroups") or raw.get("dataset_groups") or [])
+            if isinstance(raw, dict)
+            else []
         )
         return [DatasetGroup(**item) for item in groups if isinstance(item, dict)]
 
