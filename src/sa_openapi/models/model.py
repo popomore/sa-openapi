@@ -182,7 +182,7 @@ class AttributionReportResponse(BaseModel):
 
 class SqlQueryResponse(BaseModel):
     columns: list[str] | None = None
-    data: list[dict[str, Any]] | None = None
+    data: list[list[Any]] | None = None
 
     model_config = {"populate_by_name": True}
 

@@ -78,6 +78,9 @@ class SensorsAnalyticsClient:
         self.dashboard = _SyncServiceProxy(self._async_client.dashboard, self._run_sync)
         self.channel = _SyncServiceProxy(self._async_client.channel, self._run_sync)
         self.dataset = _SyncServiceProxy(self._async_client.dataset, self._run_sync)
+        self.event_meta = _SyncServiceProxy(self._async_client.event_meta, self._run_sync)
+        self.property_meta = _SyncServiceProxy(self._async_client.property_meta, self._run_sync)
+        self.smart_alarm = _SyncServiceProxy(self._async_client.smart_alarm, self._run_sync)
         self.model = _SyncServiceProxy(self._async_client.model, self._run_sync)
 
     def _run_sync(self, coro: Any, timeout: float | None = None) -> Any:
