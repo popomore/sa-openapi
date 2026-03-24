@@ -275,9 +275,7 @@ def test_user_tag_dir_define_recursive():
 def test_event_with_property_model():
     ewp = EventWithProperty(
         eventDefine={"id": 1, "name": "$pageview"},
-        properties=[
-            {"id": 1, "name": "city", "cname": "城市", "data_type": "string"}
-        ],
+        properties=[{"id": 1, "name": "city", "cname": "城市", "data_type": "string"}],
     )
     assert ewp.event_define["name"] == "$pageview"
     assert len(ewp.properties) == 1
@@ -315,12 +313,8 @@ def test_smart_alarm_config_model():
 
 def test_smart_alarm_config_alias():
     # Test both alias and snake_case construction
-    alarm1 = SmartAlarmConfig(
-        id=1, title="test", unit="day", sendAlarm=False, emails=[]
-    )
-    alarm2 = SmartAlarmConfig(
-        id=1, title="test", unit="day", send_alarm=False, emails=[]
-    )
+    alarm1 = SmartAlarmConfig(id=1, title="test", unit="day", sendAlarm=False, emails=[])
+    alarm2 = SmartAlarmConfig(id=1, title="test", unit="day", send_alarm=False, emails=[])
     assert alarm1.send_alarm is False
     assert alarm2.send_alarm is False
 
