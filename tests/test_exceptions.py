@@ -2,6 +2,7 @@
 
 from sa_openapi._exceptions import (
     AuthenticationError,
+    NetworkError,
     NotFoundError,
     RateLimitError,
     ServerError,
@@ -55,3 +56,9 @@ def test_timeout_error():
     """Test timeout error."""
     err = TimeoutError()
     assert err.code == "TIMEOUT_ERROR"
+
+
+def test_network_error():
+    """Test network error."""
+    err = NetworkError()
+    assert err.code == "NETWORK_ERROR"

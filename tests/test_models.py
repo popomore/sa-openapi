@@ -1,6 +1,7 @@
 """Tests for models."""
 
 from sa_openapi.models.channel import CampaignDetail, ChannelLinkDetail
+from sa_openapi.models.common import Pagination
 from sa_openapi.models.dashboard import Bookmark, BookmarkRelateDashboard, DashboardType, Navigation
 from sa_openapi.models.dataset import (
     Dataset,
@@ -70,6 +71,16 @@ def test_bookmark_model():
     assert bookmark.id == 1
     assert bookmark.name == "Test Bookmark"
     assert bookmark.user_id == 100
+
+
+def test_pagination_properties():
+    page = Pagination(page=2, pageSize=20, total=45, totalPages=3)
+    assert page.has_next is True
+    assert page.has_previous is True
+
+    first_page = Pagination(page=1, pageSize=20, total=10, totalPages=1)
+    assert first_page.has_next is False
+    assert first_page.has_previous is False
 
 
 def test_campaign_detail_model():
