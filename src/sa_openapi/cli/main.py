@@ -5,7 +5,17 @@ import click
 from .._config import ConfigManager
 from .._log import setup_logging
 from ..client import SensorsAnalyticsClient
-from . import channel, config, dashboard, dataset, event_meta, model, property_meta, smart_alarm
+from . import (
+    channel,
+    config,
+    dashboard,
+    dataset,
+    event_meta,
+    model,
+    property_meta,
+    smart_alarm,
+    sql,
+)
 
 
 @click.group()
@@ -71,6 +81,7 @@ cli.add_command(event_meta.event_meta)
 cli.add_command(property_meta.property_meta)
 cli.add_command(smart_alarm.smart_alarm)
 cli.add_command(config.config)
+cli.add_command(sql.sql)
 
 
 if __name__ == "__main__":
