@@ -81,7 +81,7 @@ class ModelServiceV1:
             json=params,
         )
 
-        # Parse NDJSON: each line is {"code":"SUCCESS","data":{"data":[...row values...]}}
+        columns: list[str] | None = None
         rows: list[list[Any]] = []
         for line in response.content.decode().strip().split("\n"):
             if not line.strip():
@@ -90,12 +90,23 @@ class ModelServiceV1:
                 obj = json_module.loads(line)
                 if isinstance(obj, dict) and obj.get("code") == "SUCCESS":
                     row_data = obj.get("data", {})
-                    if isinstance(row_data, dict) and "data" in row_data:
-                        rows.append(row_data["data"])
+                    if isinstance(row_data, dict):
+                        if columns is None and "columns" in row_data:
+                            columns = row_data["columns"]
+                        if "data" in row_data:
+                            data_val = row_data["data"]
+                            if (
+                                isinstance(data_val, list)
+                                and data_val
+                                and isinstance(data_val[0], list)
+                            ):
+                                rows.extend(data_val)
+                            elif isinstance(data_val, list):
+                                rows.append(data_val)
             except (ValueError, KeyError):
                 continue
 
-        return SqlQueryResponse(data=rows if rows else None)
+        return SqlQueryResponse(columns=columns, data=rows if rows else None)
 
     async def segmentation_report(self, **kwargs: Any) -> SegmentationReportResponse:
         """Get segmentation (事件分析) report.

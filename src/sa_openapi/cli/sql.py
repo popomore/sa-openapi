@@ -28,7 +28,8 @@ def sql(ctx, sql, limit, output_format):
         columns = result.columns or [f"col_{i}" for i in range(len(first_row))]
 
         if output_format == "json":
-            print_json(result.model_dump(by_alias=True))
+            json_rows = [dict(zip(columns, row, strict=False)) for row in data]
+            print_json(json_rows)
         elif output_format == "csv":
             from .output import print_csv
 
