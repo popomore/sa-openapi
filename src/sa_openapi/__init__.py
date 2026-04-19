@@ -32,6 +32,8 @@ Async usage:
         navigations = await client.dashboard.list_navigation()
 """
 
+from importlib.metadata import PackageNotFoundError, version
+
 from ._config import ClientConfig, ConfigManager
 from ._exceptions import (
     AuthenticationError,
@@ -46,7 +48,10 @@ from ._exceptions import (
 from .async_client import AsyncSensorsAnalyticsClient
 from .client import SensorsAnalyticsClient
 
-__version__ = "0.1.0"
+try:
+    __version__ = version("sa-openapi")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 
 __all__ = [
     "AsyncSensorsAnalyticsClient",
