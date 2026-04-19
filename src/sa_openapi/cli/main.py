@@ -41,8 +41,13 @@ from . import (
     "--project",
     help="Override project",
 )
+@click.option(
+    "--version",
+    "api_version",
+    help="Override API version (e.g. v1)",
+)
 @click.pass_context
-def cli(ctx, debug, profile, base_url, api_key, project):
+def cli(ctx, debug, profile, base_url, api_key, project, api_version):
     """Sensors Analytics CLI."""
     setup_logging(debug=debug)
 
@@ -65,6 +70,8 @@ def cli(ctx, debug, profile, base_url, api_key, project):
         cfg.api_key = api_key
     if project:
         cfg.project = project
+    if api_version:
+        cfg.version = api_version
 
     # Create client
     client = SensorsAnalyticsClient.from_config(cfg)

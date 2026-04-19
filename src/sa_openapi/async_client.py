@@ -43,6 +43,7 @@ class AsyncSensorsAnalyticsClient:
         *,
         timeout: float = 30.0,
         max_retries: int = 3,
+        version: str = "v1",
     ):
         self.config = ClientConfig(
             base_url=base_url,
@@ -50,6 +51,7 @@ class AsyncSensorsAnalyticsClient:
             project=project,
             timeout=timeout,
             max_retries=max_retries,
+            version=version,
         )
         self._auth = AuthHandler(api_key, project)
         self._transport = AiohttpTransport(self.config, self._auth)
@@ -81,6 +83,7 @@ class AsyncSensorsAnalyticsClient:
             project=config.project,
             timeout=config.timeout,
             max_retries=config.max_retries,
+            version=config.version,
         )
 
     @classmethod
