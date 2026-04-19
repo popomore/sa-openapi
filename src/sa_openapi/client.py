@@ -58,6 +58,7 @@ class SensorsAnalyticsClient:
         timeout: float = 30.0,
         max_retries: int = 3,
         sync_timeout: float = 30.0,
+        version: str = "v1",
     ):
         self._closed = False
         self._sync_timeout = sync_timeout
@@ -73,6 +74,7 @@ class SensorsAnalyticsClient:
             project=project,
             timeout=timeout,
             max_retries=max_retries,
+            version=version,
         )
 
         self.dashboard = _SyncServiceProxy(self._async_client.dashboard, self._run_sync)
@@ -120,6 +122,7 @@ class SensorsAnalyticsClient:
             timeout=config.timeout,
             max_retries=config.max_retries,
             sync_timeout=max(config.timeout * 2, 30.0),
+            version=config.version,
         )
 
     @classmethod

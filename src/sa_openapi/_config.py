@@ -27,22 +27,29 @@ class ClientConfig:
         project: str,
         timeout: float = 30.0,
         max_retries: int = 3,
+        version: str = "v1",
     ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.project = project
         self.timeout = timeout
         self.max_retries = max_retries
+        self.version = version
+
+    @property
+    def analytics_base_url(self) -> str:
+        """Analytics API base path."""
+        return f"{self.base_url}/api/v3/analytics/{self.version}"
 
     @property
     def dashboard_v1_base_url(self) -> str:
         """Dashboard/Channel/Dataset base path (v1 API)."""
-        return f"{self.base_url}/api/v3/analytics/v1"
+        return self.analytics_base_url
 
     @property
     def model_v1_base_url(self) -> str:
         """Model service base path (v1 API)."""
-        return f"{self.base_url}/api/v3/analytics/v1"
+        return self.analytics_base_url
 
 
 class ConfigManager:
@@ -85,6 +92,7 @@ class ConfigManager:
             project=section.get("project", "default"),
             timeout=section.get("timeout", 30.0),
             max_retries=section.get("max_retries", 3),
+            version=section.get("version", "v1"),
         )
 
     def get_default_profile(self) -> ClientConfig | None:
@@ -103,6 +111,7 @@ class ConfigManager:
             "project": config.project,
             "timeout": config.timeout,
             "max_retries": config.max_retries,
+            "version": config.version,
         }
         self._save_to_file()
 

@@ -33,6 +33,7 @@ class FakeAsyncClient:
         *,
         timeout: float = 30.0,
         max_retries: int = 3,
+        version: str = "v1",
     ):
         self.init_args = {
             "base_url": base_url,
