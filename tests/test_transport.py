@@ -226,6 +226,27 @@ async def test_request_retries_timeout_errors_and_raises_last_failure(monkeypatc
     sleep.assert_awaited_once_with(1)
 
 
+async def test_request_raises_generic_network_error_when_retry_loop_never_runs():
+    """Test the defensive fallback when retries resolve to zero iterations."""
+
+    class ZeroRetryCount:
+        def __gt__(self, other: object) -> bool:
+            return True
+
+        def __lt__(self, other: object) -> bool:
+            return False
+
+        def __index__(self) -> int:
+            return 0
+
+    transport = make_transport()
+    transport.config.max_retries = ZeroRetryCount()  # type: ignore[assignment]
+    transport._get_session = AsyncMock(return_value=FakeSession([]))
+
+    with pytest.raises(NetworkError, match="Request failed"):
+        await transport.request("GET", "https://example.sensorsdata.cn/api/test")
+
+
 @pytest.mark.parametrize(
     ("status", "error_type", "message"),
     [
